@@ -1,0 +1,207 @@
+[
+    {
+        "category": "Languages",
+        "skills": [
+            {
+                "name": "Python",
+                "proficiency": "Advanced",
+                "yearsExperience": 3,
+                "projectsUsed": [2, 3]
+            },
+            {
+                "name": "JavaScript",
+                "proficiency": "Advanced",
+                "yearsExperience": 2.5,
+                "projectsUsed": [1]
+            },
+            {
+                "name": "Java",
+                "proficiency": "Intermediate",
+                "yearsExperience": 2,
+                "projectsUsed": []
+            },
+            {
+                "name": "C++",
+                "proficiency": "Intermediate",
+                "yearsExperience": 2,
+                "projectsUsed": []
+            },
+            {
+                "name": "C",
+                "proficiency": "Intermediate",
+                "yearsExperience": 1.5,
+                "projectsUsed": []
+            }
+        ]
+    },
+    {
+        "category": "Frameworks & Libraries",
+        "skills": [
+            {
+                "name": "React.js",
+                "proficiency": "Advanced",
+                "yearsExperience": 2.5,
+                "projectsUsed": [1]
+            },
+            {
+                "name": "Node.js",
+                "proficiency": "Advanced",
+                "yearsExperience": 2.5,
+                "projectsUsed": [1]
+            },
+            {
+                "name": "Express.js",
+                "proficiency": "Advanced",
+                "yearsExperience": 2.5,
+                "projectsUsed": [1]
+            },
+            {
+                "name": "FastAPI",
+                "proficiency": "Advanced",
+                "yearsExperience": 1.5,
+                "projectsUsed": [2]
+            },
+            {
+                "name": "Tailwind CSS",
+                "proficiency": "Advanced",
+                "yearsExperience": 2,
+                "projectsUsed": [1]
+            },
+            {
+                "name": "Tkinter",
+                "proficiency": "Intermediate",
+                "yearsExperience": 1,
+                "projectsUsed": [3]
+            }
+        ]
+    },
+    {
+        "category": "Databases & Cloud",
+        "skills": [
+            {
+                "name": "MongoDB",
+                "proficiency": "Advanced",
+                "yearsExperience": 2.5,
+                "projectsUsed": [1]
+            },
+            {
+                "name": "SQLite",
+                "proficiency": "Intermediate",
+                "yearsExperience": 1,
+                "projectsUsed": [3]
+            },
+            {
+                "name": "MySQL",
+                "proficiency": "Intermediate",
+                "yearsExperience": 1.5,
+                "projectsUsed": []
+            },
+            {
+                "name": "AWS EC2",
+                "proficiency": "Advanced",
+                "yearsExperience": 1.5,
+                "projectsUsed": [1]
+            },
+            {
+                "name": "Google Cloud (GKE)",
+                "proficiency": "Advanced",
+                "yearsExperience": 1,
+                "projectsUsed": [2]
+            },
+            {
+                "name": "Render",
+                "proficiency": "Advanced",
+                "yearsExperience": 1.5,
+                "projectsUsed": [1]
+            },
+            {
+                "name": "Vercel",
+                "proficiency": "Advanced",
+                "yearsExperience": 1.5,
+                "projectsUsed": [1]
+            }
+        ]
+    },
+    {
+        "category": "DevOps & Tools",
+        "skills": [
+            {
+                "name": "Docker",
+                "proficiency": "Advanced",
+                "yearsExperience": 1.5,
+                "projectsUsed": [1, 2]
+            },
+            {
+                "name": "Kubernetes",
+                "proficiency": "Advanced",
+                "yearsExperience": 1,
+                "projectsUsed": [2]
+            },
+            {
+                "name": "WebSockets",
+                "proficiency": "Advanced",
+                "yearsExperience": 1.5,
+                "projectsUsed": [1, 2]
+            },
+            {
+                "name": "Git & GitHub",
+                "proficiency": "Advanced",
+                "yearsExperience": 2.5,
+                "projectsUsed": []
+            },
+            {
+                "name": "Postman",
+                "proficiency": "Advanced",
+                "yearsExperience": 2,
+                "projectsUsed": []
+            },
+            {
+                "name": "VS Code",
+                "proficiency": "Advanced",
+                "yearsExperience": 3,
+                "projectsUsed": []
+            }
+        ]
+    },
+    {
+        "category": "Concepts & Practices",
+        "skills": [
+            {
+                "name": "Data Structures & Algorithms",
+                "proficiency": "Advanced",
+                "yearsExperience": 3,
+                "projectsUsed": []
+            },
+            {
+                "name": "Competitive Programming",
+                "proficiency": "Advanced",
+                "yearsExperience": 2,
+                "projectsUsed": []
+            },
+            {
+                "name": "System Design",
+                "proficiency": "Intermediate",
+                "yearsExperience": 1.5,
+                "projectsUsed": [1, 2]
+            },
+            {
+                "name": "Microservices",
+                "proficiency": "Intermediate",
+                "yearsExperience": 1,
+                "projectsUsed": [2]
+            },
+            {
+                "name": "Authentication & Security",
+                "proficiency": "Intermediate",
+                "yearsExperience": 1.5,
+                "projectsUsed": [1]
+            },
+            {
+                "name": "REST APIs",
+                "proficiency": "Advanced",
+                "yearsExperience": 2.5,
+                "projectsUsed": [1]
+            }
+        ]
+    }
+]

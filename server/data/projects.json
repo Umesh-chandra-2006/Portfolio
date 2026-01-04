@@ -1,0 +1,73 @@
+[
+    {
+        "id": 1,
+        "name": "Code Slayer",
+        "tagline": "Full-Stack Online Judge & Coding Platform",
+        "description": "A comprehensive full-stack online judge system that enables users to solve coding problems with secure multi-language code execution. Features a real-time code editor with Monaco Editor, automated judge system, and AI-assisted code review.",
+        "techStack": ["React.js", "Node.js", "Express.js", "MongoDB", "Docker", "AWS", "Gemini API"],
+        "bullets": [
+            "Built full-stack Online Judge System serving 50+ students daily with secure code execution under strict time & memory limits",
+            "Developed real-time code editor (Monaco Editor) with scalable REST APIs supporting problem management, authentication, and submission history",
+            "Optimized MongoDB schemas to handle 10,000+ records efficiently with JWT authentication and bcrypt hashing, reducing login errors by 25%",
+            "Containerized code execution engine with Docker, improving evaluation speed by 40% with average execution time under 2 seconds",
+            "Deployed services on AWS EC2, Render, and Vercel ensuring high availability and scalability",
+            "Integrated AI-assisted code review system using Gemini API to provide intelligent feedback and enhance learning experience",
+            "Validated system performance with 500+ test submissions achieving consistent reliability and user satisfaction"
+        ],
+        "links": {
+            "github": "https://github.com/Umesh-chandra-2006/Code_Slayer",
+            "demo": "https://codeslayer.me"
+        },
+        "visual": "https://via.placeholder.com/600x400",
+        "date": "2025",
+        "priority": 1,
+        "keywords": ["online-judge", "fullstack", "code-execution", "react", "node.js"],
+        "featured": true
+    },
+    {
+        "id": 2,
+        "name": "MarketPulse-X",
+        "tagline": "AI-Powered Supply Chain Intelligence System",
+        "description": "Real-time portfolio intelligence system that detects supply chain disruptions from live news and analyzes cascading impacts on tracked investments using AI. Implements sophisticated backend processing pipeline with WebSocket real-time alerts.",
+        "techStack": ["Python", "FastAPI", "Docker", "Kubernetes", "WebSockets", "Google Gemini", "Yahoo Finance"],
+        "bullets": [
+            "Built real-time portfolio intelligence system detecting supply chain disruptions from live news feeds with multi-source integration (Finnhub, NewsAPI, RSS)",
+            "Designed 7-stage backend processing pipeline for event validation, relationship extraction, impact inference, scoring, and AI-powered explanation generation using FastAPI",
+            "Integrated Google Gemini AI to extract supply chain relationships (e.g., TSMC → Apple) and infer downstream portfolio impacts with high accuracy",
+            "Implemented WebSocket-based real-time alerts broadcasting critical market events instantly to connected clients with <1 second latency",
+            "Containerized all services using Docker and deployed on Kubernetes cluster, gaining hands-on experience with orchestration, auto-scaling, and service reliability",
+            "Integrated live market data using Yahoo Finance APIs for continuous portfolio monitoring and impact analysis",
+            "System handles 1000+ concurrent connections with 99.9% uptime during market volatility"
+        ],
+        "links": {
+            "github": "https://github.com/Jaswanth-K1210/MarketPulse"
+        },
+        "visual": "https://via.placeholder.com/600x400",
+        "date": "2024",
+        "priority": 2,
+        "keywords": ["ai", "supply-chain", "kubernetes", "websockets", "fastapi"],
+        "featured": true
+    },
+    {
+        "id": 3,
+        "name": "Expense Tracker",
+        "tagline": "Personal Finance Manager with Analytics",
+        "description": "A lightweight Python desktop application for personal financial management. Enables transaction categorization, budget tracking, and comprehensive financial analytics with interactive visualizations.",
+        "techStack": ["Python", "Tkinter", "SQLite", "Matplotlib"],
+        "bullets": [
+            "Designed and implemented full-featured Personal Expense Tracker with intuitive Tkinter GUI for seamless user experience",
+            "Enabled users to add, edit, and categorize transactions (income & expenses) with flexible monthly budget setting and tracking",
+            "Developed persistent SQLite database with optimized queries for fast retrieval of financial records and analytics",
+            "Integrated advanced analytics engine with Matplotlib for interactive visualization of budget usage and spending breakdowns",
+            "Provides comprehensive financial reports and insights helping users understand spending patterns and manage budgets effectively"
+        ],
+        "links": {
+            "github": "https://github.com/Umesh-chandra-2006/expense-tracker"
+        },
+        "visual": "https://via.placeholder.com/600x400",
+        "date": "2024",
+        "priority": 3,
+        "keywords": ["finance", "python", "analytics"],
+        "featured": false
+    }
+]
