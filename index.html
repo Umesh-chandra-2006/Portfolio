@@ -6,26 +6,29 @@
 <title>Umesh Chandra — Builder</title>
 <link rel="icon" type="image/x-icon" href="./favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Newsreader:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,500,400&f[]=satoshi@700,500,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Design Dials: DESIGN_VARIANCE=6, MOTION_INTENSITY=5, VISUAL_DENSITY=4 */
 :root {
   --bg:       #040507;
+  --surface:  #0d0f14;
   --gold:     #E8C547;
   --gold2:    #c9a82e;
   --violet:   #8B7FFF;
   --teal:     #4ECDC4;
   --text:     #f2efe9;
-  --muted:    #8c8a86;
-  --muted2:   #48464a;
-  --rule:     rgba(255,255,255,0.09);
+  --muted:    #94a3b8;
+  --muted2:   #475569;
+  --rule:     rgba(255,255,255,0.06);
   --font-display: 'Cabinet Grotesk', sans-serif;
-  --font-mono:    'DM Mono', monospace;
-  --font-serif:   'Newsreader', serif;
+  --font-body:    'Satoshi', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
 }
 
-body { background: var(--bg); color: var(--text); font-family: var(--font-display); overflow-x: hidden; cursor: none; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); overflow-x: hidden; cursor: none; }
 
 /* CURSOR */
 #cursor-dot { position: fixed; width: 5px; height: 5px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .15s, height .15s; mix-blend-mode: difference; }
@@ -52,21 +55,24 @@ body::after {
 nav { position: fixed; top: 0; left: 0; right: 0; z-index: 500; padding: 30px 64px; display: flex; align-items: center; justify-content: space-between; mix-blend-mode: difference; }
 .nav-logo { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.04em; color: var(--text); }
 .nav-links { display: flex; gap: 40px; list-style: none; }
-.nav-links a { font-family: var(--font-mono); font-size: 10px; color: var(--text); text-decoration: none; letter-spacing: 0.12em; text-transform: uppercase; position: relative; padding-bottom: 3px; }
+.nav-links a { font-family: var(--font-mono); font-size: 11px; color: var(--text); text-decoration: none; letter-spacing: 0.12em; text-transform: uppercase; position: relative; padding-bottom: 3px; transition: color 0.2s, transform 0.1s; }
 .nav-links a::after { content: ''; position: absolute; left: 0; right: 100%; bottom: 0; height: 1px; background: var(--text); transition: right .3s ease; }
 .nav-links a:hover::after { right: 0; }
-.nav-cta { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); text-decoration: none; position: relative; padding-bottom: 3px; cursor: none; }
+.nav-links a:active { transform: scale(0.96); }
+.nav-cta { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); text-decoration: none; position: relative; padding-bottom: 3px; cursor: none; transition: color 0.2s, transform 0.1s; }
 .nav-cta::after { content: ''; position: absolute; left: 0; right: 100%; bottom: 0; height: 1px; background: var(--gold); transition: right .3s ease; }
 .nav-cta:hover::after { right: 0; }
+.nav-cta:active { transform: scale(0.96); }
 @media (max-width: 900px) { .nav-links { display: none; } }
 
 /* CHAPTER INDEX */
 #chapter-index { position: fixed; right: 40px; top: 50%; transform: translateY(-50%); z-index: 400; display: flex; flex-direction: column; gap: 22px; }
-.chapter-dot { display: flex; align-items: center; gap: 10px; justify-content: flex-end; text-decoration: none; cursor: none; }
+.chapter-dot { display: flex; align-items: center; gap: 10px; justify-content: flex-end; text-decoration: none; cursor: none; transition: transform 0.1s; }
 .chapter-dot .num { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); transition: color .3s; }
 .chapter-dot .bar { width: 14px; height: 1px; background: var(--muted2); transition: background .3s, width .3s; }
 .chapter-dot.active .num { color: var(--gold); }
 .chapter-dot.active .bar { background: var(--gold); width: 26px; }
+.chapter-dot:active { transform: scale(0.9); }
 @media (max-width: 900px) { #chapter-index { display: none; } }
 
 main { position: relative; z-index: 2; }
@@ -76,23 +82,25 @@ main { position: relative; z-index: 2; }
 .hero-numeral {
   position: absolute; top: 8vh; right: 4vw;
   font-family: var(--font-mono); font-weight: 700; font-size: clamp(140px, 20vw, 300px);
-  color: rgba(255,255,255,0.035); line-height: 1; pointer-events: none; user-select: none; z-index: 0;
+  color: rgba(255,255,255,0.03); line-height: 1; pointer-events: none; user-select: none; z-index: 0;
 }
 .hero-content { max-width: 1200px; position: relative; z-index: 2; }
 .hero-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 32px; }
-.hero-headline { font-family: var(--font-display); font-weight: 800; font-size: clamp(54px, 8.6vw, 128px); line-height: 0.9; letter-spacing: -0.035em; margin-bottom: 44px; }
-.hero-headline .italic-line { font-family: var(--font-serif); font-style: italic; font-weight: 300; color: var(--muted); display: block; }
+.hero-headline { font-family: var(--font-display); font-weight: 800; font-size: clamp(54px, 8.6vw, 128px); line-height: 0.9; letter-spacing: -0.03em; margin-bottom: 44px; }
+.hero-headline .italic-line { font-style: italic; font-weight: 400; color: var(--muted); display: block; }
 .hero-headline .gold-word { color: var(--gold); }
-.hero-sub { font-size: 18px; color: var(--muted); line-height: 1.75; max-width: 540px; margin-bottom: 56px; }
+.hero-sub { font-size: 18px; color: var(--muted); line-height: 1.75; max-width: 580px; margin-bottom: 56px; }
 .hero-sub strong { color: var(--text); font-weight: 600; }
 .hero-actions { display: flex; gap: 32px; align-items: center; margin-bottom: 90px; }
-.btn-primary { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); text-decoration: none; display: inline-flex; align-items: center; gap: 10px; cursor: none; }
+.btn-primary { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); text-decoration: none; display: inline-flex; align-items: center; gap: 10px; cursor: none; transition: transform 0.1s; }
 .btn-primary::after { content: '→'; transition: transform .25s; }
 .btn-primary:hover::after { transform: translateX(6px); }
-.btn-text { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: relative; padding-bottom: 3px; cursor: none; }
+.btn-primary:active { transform: scale(0.96); }
+.btn-text { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: relative; padding-bottom: 3px; cursor: none; transition: color 0.2s, transform 0.1s; }
 .btn-text::after { content: ''; position: absolute; left: 0; right: 100%; bottom: 0; height: 1px; background: var(--muted); transition: right .3s; }
 .btn-text:hover { color: var(--text); }
 .btn-text:hover::after { right: 0; background: var(--text); }
+.btn-text:active { transform: scale(0.96); }
 
 /* Bare stat strip — no boxes, hairline dividers */
 .stat-strip { display: flex; gap: 0; border-top: 1px solid var(--rule); max-width: 760px; }
@@ -111,43 +119,171 @@ main { position: relative; z-index: 2; }
 .chapter-intro { max-width: 920px; margin-bottom: 110px; position: relative; z-index: 2; }
 .chapter-label { font-family: var(--font-mono); font-size: 11px; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 26px; }
 .chapter-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(42px, 6.2vw, 92px); line-height: 0.98; letter-spacing: -0.03em; margin-bottom: 28px; }
-.chapter-title em { font-family: var(--font-serif); font-style: italic; font-weight: 300; color: var(--muted); }
+.chapter-title em { font-style: italic; font-weight: 400; color: var(--muted); }
 .chapter-desc { font-size: 17px; color: var(--muted); line-height: 1.8; max-width: 640px; }
 .chapter-body { position: relative; z-index: 2; padding-bottom: 160px; }
 
-/* ROW LIST — editorial, hairline dividers, no boxes */
-.row-list { display: flex; flex-direction: column; }
-.row-item {
-  display: grid; grid-template-columns: 56px 1fr auto; gap: 40px;
-  padding: 40px 0; border-top: 1px solid var(--rule);
-  align-items: start; cursor: none; transition: padding-left .35s ease, background .35s ease;
+/* BENTO GRID (Projects) */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 32px;
 }
-.row-list .row-item:last-child { border-bottom: 1px solid var(--rule); }
-.row-item:hover { padding-left: 14px; background: rgba(255,255,255,0.012); }
-.row-num { font-family: var(--font-mono); font-size: 12px; color: var(--muted2); padding-top: 6px; }
-.row-main { min-width: 0; }
-.row-name { font-family: var(--font-display); font-size: clamp(22px, 2.6vw, 32px); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
-.row-tagline { font-family: var(--font-serif); font-style: italic; font-size: 15px; color: var(--muted); margin-bottom: 18px; }
-.row-desc { font-size: 14px; color: var(--muted); line-height: 1.75; max-width: 640px; margin-bottom: 20px; }
-.row-tags { font-family: var(--font-mono); font-size: 11px; color: var(--muted2); letter-spacing: 0.03em; margin-bottom: 18px; }
-.row-tags span { color: var(--muted); }
-.row-tags span::after { content: ' / '; color: var(--muted2); }
-.row-tags span:last-child::after { content: ''; }
-.row-links { display: flex; gap: 22px; }
-.row-links a { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 0.06em; display: inline-flex; align-items: center; gap: 5px; transition: color .2s; }
-.row-links a:hover { color: var(--gold); }
-.row-links .arr { transition: transform .2s; }
-.row-links a:hover .arr { transform: translate(3px,-3px); }
-.row-status { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; text-align: right; white-space: nowrap; padding-top: 6px; display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
-.row-status.live { color: var(--teal); }
-.row-status.live .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); animation: pulse 2s ease infinite; }
-.row-status.dev { color: var(--violet); }
-.row-status.archived { color: var(--muted2); }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.project-card {
+  grid-column: span 6;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
+  cursor: none;
+}
+.project-card:hover {
+  border-color: rgba(232, 197, 71, 0.35);
+  transform: translateY(-4px);
+}
+.project-card:active {
+  transform: translateY(-2px) scale(0.98);
+}
+.project-card.wide {
+  grid-column: span 8;
+}
+.project-card.narrow {
+  grid-column: span 4;
+}
+.project-card.featured {
+  grid-column: span 12;
+  flex-direction: row;
+}
+@media (max-width: 900px) {
+  .project-card, .project-card.wide, .project-card.narrow, .project-card.featured {
+    grid-column: span 12 !important;
+    flex-direction: column !important;
+  }
+}
+.project-image-wrapper {
+  flex: 1.1;
+  position: relative;
+  overflow: hidden;
+  background: #06080a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  border-bottom: 1px solid var(--rule);
+}
+.project-card.featured .project-image-wrapper {
+  border-bottom: none;
+  border-right: 1px solid var(--rule);
+}
+@media (max-width: 900px) {
+  .project-card.featured .project-image-wrapper {
+    border-right: none;
+    border-bottom: 1px solid var(--rule);
+  }
+}
+.project-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.project-card:hover .project-image {
+  transform: scale(1.04);
+}
+.project-info {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+.project-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.project-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted2);
+}
+.project-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.project-status.live { color: var(--teal); }
+.project-status.live .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); animation: pulse 2s ease infinite; }
+.project-status.dev { color: var(--violet); }
+.project-status.archived { color: var(--muted2); }
 
-@media (max-width: 800px) {
-  .row-item { grid-template-columns: 1fr; gap: 12px; }
-  .row-status { text-align: left; justify-content: flex-start; }
+.project-name {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.project-tagline {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.project-desc {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 24px;
+  flex-grow: 1;
+}
+.project-tags {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted2);
+  margin-bottom: 24px;
+}
+.project-tags span { color: var(--muted); }
+.project-tags span::after { content: ' / '; color: var(--muted2); }
+.project-tags span:last-child::after { content: ''; }
+
+.project-links {
+  display: flex;
+  gap: 20px;
+}
+.project-links a {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.2s, transform 0.1s;
+}
+.project-links a:hover {
+  color: var(--gold);
+}
+.project-links a:active {
+  transform: scale(0.96);
+}
+.project-links .arr {
+  transition: transform 0.2s;
+}
+.project-links a:hover .arr {
+  transform: translate(3px, -3px);
 }
 
 /* ABOUT specific: text + bare fact list */
@@ -158,14 +294,15 @@ main { position: relative; z-index: 2; }
 .fact-list { display: flex; flex-direction: column; }
 .fact-row { padding: 22px 0; border-top: 1px solid var(--rule); }
 .fact-list .fact-row:last-child { border-bottom: 1px solid var(--rule); }
-.fact-label { font-family: var(--font-mono); font-size: 9px; color: var(--muted2); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
+.fact-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
 .fact-value { font-size: 15px; color: var(--text); font-weight: 600; }
 .fact-sub { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-top: 3px; }
 @media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; gap: 48px; } }
 
 /* EXPERIENCE — editorial rows */
-.exp-row { display: grid; grid-template-columns: 210px 1fr; gap: 48px; padding: 48px 0; border-top: 1px solid var(--rule); }
+.exp-row { display: grid; grid-template-columns: 210px 1fr; gap: 48px; padding: 48px 0; border-top: 1px solid var(--rule); transition: transform 0.1s; }
 .exp-list .exp-row:last-child { border-bottom: 1px solid var(--rule); }
+.exp-row:active { transform: scale(0.99); }
 .exp-org { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--gold); letter-spacing: 0.03em; }
 .exp-org-sub { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); letter-spacing: 0.05em; margin-top: 4px; }
 .exp-period { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); letter-spacing: 0.06em; margin-top: 14px; }
@@ -182,10 +319,11 @@ main { position: relative; z-index: 2; }
 @media (max-width: 800px) { .exp-row { grid-template-columns: 1fr; gap: 14px; } }
 
 /* CREDENTIALS — editorial rows */
-.cred-row { display: grid; grid-template-columns: 220px 1fr auto; gap: 40px; padding: 36px 0; border-top: 1px solid var(--rule); align-items: start; }
+.cred-row { display: grid; grid-template-columns: 220px 1fr auto; gap: 40px; padding: 36px 0; border-top: 1px solid var(--rule); align-items: start; transition: transform 0.1s; }
 .creds-list .cred-row:last-child { border-bottom: 1px solid var(--rule); }
-.cred-org { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); letter-spacing: 0.1em; text-transform: uppercase; padding-top: 4px; }
-.cred-title { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; }
+.cred-row:active { transform: scale(0.99); }
+.cred-org { font-family: var(--font-mono); font-size: 11px; color: var(--muted2); letter-spacing: 0.1em; text-transform: uppercase; padding-top: 4px; }
+.cred-title { font-family: var(--font-display); font-size: 19px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 8px; }
 .cred-detail { font-size: 13px; color: var(--muted); line-height: 1.65; max-width: 560px; }
 .cred-badge { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; padding-top: 4px; }
 .cred-badge.gold { color: var(--gold); }
@@ -201,16 +339,17 @@ main { position: relative; z-index: 2; }
 @media (max-width: 700px) { .skills-row { grid-template-columns: 1fr; gap: 10px; } }
 
 /* CONTACT */
-.contact-heading { font-family: var(--font-display); font-size: clamp(46px, 6.4vw, 96px); font-weight: 800; letter-spacing: -0.035em; line-height: 0.94; margin-bottom: 30px; }
-.contact-heading em { font-family: var(--font-serif); font-style: italic; font-weight: 300; color: var(--muted); }
+.contact-heading { font-family: var(--font-display); font-size: clamp(46px, 6.4vw, 96px); font-weight: 800; letter-spacing: -0.03em; line-height: 0.94; margin-bottom: 30px; }
+.contact-heading em { font-style: italic; font-weight: 400; color: var(--muted); }
 .contact-sub { font-size: 17px; color: var(--muted); line-height: 1.75; max-width: 620px; margin-bottom: 20px; }
-.contact-note { font-family: var(--font-serif); font-style: italic; font-size: 20px; color: var(--muted); line-height: 1.8; max-width: 720px; margin-bottom: 70px; }
+.contact-note { font-size: 17px; color: var(--muted); line-height: 1.75; max-width: 720px; margin-bottom: 70px; }
 .contact-links { display: flex; flex-direction: column; }
-.contact-row { display: flex; align-items: baseline; justify-content: space-between; padding: 26px 0; border-top: 1px solid var(--rule); text-decoration: none; cursor: none; }
+.contact-row { display: flex; align-items: baseline; justify-content: space-between; padding: 26px 0; border-top: 1px solid var(--rule); text-decoration: none; cursor: none; transition: transform 0.1s; }
 .contact-links .contact-row:last-child { border-bottom: 1px solid var(--rule); }
 .contact-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); letter-spacing: 0.12em; text-transform: uppercase; }
 .contact-value { font-size: 20px; color: var(--text); font-family: var(--font-display); font-weight: 600; transition: color .25s; }
 .contact-row:hover .contact-value { color: var(--gold); }
+.contact-row:active { transform: scale(0.99); }
 .contact-arr { font-size: 18px; color: var(--muted2); transition: color .2s, transform .2s; }
 .contact-row:hover .contact-arr { color: var(--gold); transform: translate(4px,-4px); }
 
@@ -267,9 +406,7 @@ footer { padding: 48px 64px; border-top: 1px solid var(--rule); display: flex; a
       <span class="gold-word">work.</span>
     </h1>
     <p class="hero-sub" id="hero-sub">
-      Currently AI Engineer Intern at <strong>IISPPR</strong>, building n8n LLM pipelines.
-      Ex-SWE intern at AlgoUniversity (YC-backed). I build full-stack products
-      and ship them — <strong>PlaceIQ</strong>, <strong>OmniLearn</strong>, <strong>Kairos</strong>.
+      AI Engineer Intern at <strong>IISPPR</strong> (ex-AlgoUniversity). I build and ship production-grade full-stack products that scale.
     </p>
     <div class="hero-actions" id="hero-actions">
       <a href="#projects" class="btn-primary">View projects</a>
@@ -286,7 +423,6 @@ footer { padding: 48px 64px; border-top: 1px solid var(--rule); display: flex; a
 <section id="about" class="chapter">
   <div class="chapter-numeral-bg">01</div>
   <div class="chapter-intro reveal">
-    <div class="chapter-label">01 — About</div>
     <h2 class="chapter-title">Ships things. <em>Doesn't just demo them.</em></h2>
     <p class="chapter-desc">Pre-final year CS student who'd rather deploy a rough version than polish a slide deck about one.</p>
   </div>
@@ -310,83 +446,138 @@ footer { padding: 48px 64px; border-top: 1px solid var(--rule); display: flex; a
 <section id="projects" class="chapter">
   <div class="chapter-numeral-bg">02</div>
   <div class="chapter-intro reveal">
-    <div class="chapter-label">02 — Projects</div>
+    <div class="chapter-label">02 — Selected Works</div>
     <h2 class="chapter-title">Six things I <em>actually built.</em></h2>
     <p class="chapter-desc">Solo and team builds, ordered the way they happened — not curated for effect.</p>
   </div>
   <div class="chapter-body">
-    <div class="row-list">
+    <div class="projects-grid">
 
-      <div class="row-item reveal">
-        <div class="row-num">01</div>
-        <div class="row-main">
-          <div class="row-name">Code Slayer</div>
-          <div class="row-tagline">A full-stack online judge. Solo build.</div>
-          <p class="row-desc">Production online judge that served 150+ users with 500+ submissions in its first month. Sandboxed C++/Python execution engine with hard TLE/MLE/CE detection (1,000ms timeout, 256MB RAM), a 3-scenario Gemini AI code reviewer, and JWT + RBAC auth. Domain no longer active — code and architecture live on GitHub.</p>
-          <div class="row-tags"><span>AWS EC2/ECR</span><span>React</span><span>Node.js</span><span>Docker</span><span>MongoDB</span><span>Gemini API</span></div>
-          <div class="row-links"><a href="https://github.com/Umesh-chandra-2006/Code_Slayer" target="_blank">GitHub <span class="arr">↗</span></a></div>
+      <!-- PlaceIQ -->
+      <div class="project-card featured reveal">
+        <div class="project-image-wrapper">
+          <img src="./assets/placeiq_preview.png" alt="PlaceIQ Dashboard Preview" class="project-image">
         </div>
-        <div class="row-status archived">Archived</div>
+        <div class="project-info">
+          <div class="project-meta">
+            <span class="project-num">01</span>
+            <span class="project-status live"><span class="dot"></span>Live</span>
+          </div>
+          <div>
+            <h3 class="project-name">PlaceIQ</h3>
+            <p class="project-tagline">Multi-tenant placement platform. Solo build.</p>
+            <p class="project-desc">4-tier hierarchical RBAC (Super Admin → College Admin → Coordinator → Student) across 10 indexed MongoDB schemas and 65 REST endpoints. Deployed with a hybrid ATS resume-scoring pipeline combining rule-based keyword matching with OpenRouter AI review, FastAPI scraper, Twilio alerts, and a Docker pipeline.</p>
+            <div class="project-tags"><span>React</span><span>Node.js</span><span>FastAPI</span><span>MongoDB</span><span>OpenRouter API</span><span>Docker</span></div>
+          </div>
+          <div class="project-links">
+            <a href="https://place-iq-six.vercel.app" target="_blank">Live <span class="arr">↗</span></a>
+            <a href="https://github.com/Umesh-chandra-2006/PlaceIQ" target="_blank">GitHub <span class="arr">↗</span></a>
+          </div>
+        </div>
       </div>
 
-      <div class="row-item reveal">
-        <div class="row-num">02</div>
-        <div class="row-main">
-          <div class="row-name">MarketPulse-X</div>
-          <div class="row-tagline">6-agent AI pipeline, built at a Guinness World Record hackathon. Team build.</div>
-          <p class="row-desc">Supply chain risk intelligence platform built at Google Agentathon (15,000+ participants, GWR event). Owned the LangGraph multi-agent architecture and state management while teammates built the SEC EDGAR integration and GKE deployment. Autonomous confidence loop re-triggers upstream agents on low-confidence analyses (below 70%).</p>
-          <div class="row-tags"><span>LangGraph</span><span>FastAPI</span><span>Kubernetes</span><span>SEC EDGAR</span><span>GWR Event</span></div>
-          <div class="row-links"><a href="https://github.com/Jaswanth-K1210/MarketPulse" target="_blank">GitHub <span class="arr">↗</span></a><a href="https://market-pulse-jet.vercel.app" target="_blank">Live <span class="arr">↗</span></a></div>
+      <!-- Code Slayer -->
+      <div class="project-card wide reveal">
+        <div class="project-image-wrapper">
+          <img src="./assets/codeslayer_preview.png" alt="Code Slayer Run Preview" class="project-image">
         </div>
-        <div class="row-status dev">Hackathon</div>
+        <div class="project-info">
+          <div class="project-meta">
+            <span class="project-num">02</span>
+            <span class="project-status archived">Archived</span>
+          </div>
+          <div>
+            <h3 class="project-name">Code Slayer</h3>
+            <p class="project-tagline">Full-stack online judge. Solo build.</p>
+            <p class="project-desc">Served 150+ users with 500+ submissions in its first month. Sandboxed C++/Python execution engine with hard TLE/MLE/CE detection (1,000ms timeout, 256MB RAM), a 3-scenario Gemini AI code reviewer, and JWT + RBAC authorization.</p>
+            <div class="project-tags"><span>AWS EC2/ECR</span><span>React</span><span>Node.js</span><span>Docker</span><span>MongoDB</span><span>Gemini API</span></div>
+          </div>
+          <div class="project-links">
+            <a href="https://github.com/Umesh-chandra-2006/Code_Slayer" target="_blank">GitHub <span class="arr">↗</span></a>
+          </div>
+        </div>
       </div>
 
-      <div class="row-item reveal">
-        <div class="row-num">03</div>
-        <div class="row-main">
-          <div class="row-name">Blog</div>
-          <div class="row-tagline">MERN blogging platform. Solo build.</div>
-          <p class="row-desc">Full-stack blog platform with role-based access across User, Author, and Admin tiers, JWT authentication, and a commenting system.</p>
-          <div class="row-tags"><span>React</span><span>Node.js</span><span>MongoDB</span><span>JWT</span></div>
-          <div class="row-links"><a href="https://blog-woad-eight-95.vercel.app" target="_blank">Live <span class="arr">↗</span></a><a href="https://github.com/Umesh-chandra-2006/blog" target="_blank">GitHub <span class="arr">↗</span></a></div>
+      <!-- MarketPulse-X -->
+      <div class="project-card narrow reveal">
+        <div class="project-image-wrapper">
+          <img src="./assets/marketpulse_preview.png" alt="MarketPulse Agent Node Map" class="project-image">
         </div>
-        <div class="row-status live"><span class="dot"></span>Live</div>
+        <div class="project-info">
+          <div class="project-meta">
+            <span class="project-num">03</span>
+            <span class="project-status dev">Hackathon</span>
+          </div>
+          <div>
+            <h3 class="project-name">MarketPulse-X</h3>
+            <p class="project-tagline">6-agent LangGraph pipeline.</p>
+            <p class="project-desc">Supply chain risk platform built at Google Agentathon (15k+ participants, GWR event). Owned LangGraph multi-agent architecture and state. Autonomous confidence loop re-triggers agents on low confidence.</p>
+            <div class="project-tags"><span>LangGraph</span><span>FastAPI</span><span>Kubernetes</span><span>SEC EDGAR</span></div>
+          </div>
+          <div class="project-links">
+            <a href="https://market-pulse-jet.vercel.app" target="_blank">Live <span class="arr">↗</span></a>
+            <a href="https://github.com/Jaswanth-K1210/MarketPulse" target="_blank">GitHub <span class="arr">↗</span></a>
+          </div>
+        </div>
       </div>
 
-      <div class="row-item reveal">
-        <div class="row-num">04</div>
-        <div class="row-main">
-          <div class="row-name">OmniLearn</div>
-          <div class="row-tagline">Full-featured LMS. Team build.</div>
-          <p class="row-desc">Learning management system with HLS video streaming, an FFmpeg transcoding queue, AWS S3 presigned uploads, Razorpay payments, and dynamic PDF certificate generation via Brevo. Role-based access across Student, Instructor, and Admin tiers.</p>
-          <div class="row-tags"><span>MERN</span><span>FFmpeg</span><span>AWS S3</span><span>Razorpay</span><span>Brevo</span></div>
-          <div class="row-links"><a href="https://mern-team-32.vercel.app" target="_blank">Live <span class="arr">↗</span></a><a href="https://github.com/Umesh-chandra-2006/MERN_TEAM-32" target="_blank">GitHub <span class="arr">↗</span></a></div>
+      <!-- Blog -->
+      <div class="project-card reveal">
+        <div class="project-info">
+          <div class="project-meta">
+            <span class="project-num">04</span>
+            <span class="project-status live"><span class="dot"></span>Live</span>
+          </div>
+          <div>
+            <h3 class="project-name">MERN Blog</h3>
+            <p class="project-tagline">Role-based blogging platform. Solo build.</p>
+            <p class="project-desc">Full-stack blog platform featuring User, Author, and Admin access tiers, JWT authentication, post creation, and an interactive commenting system.</p>
+            <div class="project-tags"><span>React</span><span>Node.js</span><span>MongoDB</span><span>JWT</span></div>
+          </div>
+          <div class="project-links">
+            <a href="https://blog-woad-eight-95.vercel.app" target="_blank">Live <span class="arr">↗</span></a>
+            <a href="https://github.com/Umesh-chandra-2006/blog" target="_blank">GitHub <span class="arr">↗</span></a>
+          </div>
         </div>
-        <div class="row-status live"><span class="dot"></span>Live</div>
       </div>
 
-      <div class="row-item reveal">
-        <div class="row-num">05</div>
-        <div class="row-main">
-          <div class="row-name">Kairos</div>
-          <div class="row-tagline">The opportune moment for placement prep. Solo build.</div>
-          <p class="row-desc">A daily AI-evaluated question app for engineering students. Active recall, not passive content. Answer a question, get scored by Claude, build a streak. Built for Tier-2/3 students who don't have coaching centres.</p>
-          <div class="row-tags"><span>Claude API</span><span>React Native</span><span>Node.js</span><span>MongoDB</span></div>
-          <div class="row-links"><a href="https://github.com/Umesh-chandra-2006/Kairos" target="_blank">GitHub <span class="arr">↗</span></a></div>
+      <!-- OmniLearn -->
+      <div class="project-card reveal">
+        <div class="project-info">
+          <div class="project-meta">
+            <span class="project-num">05</span>
+            <span class="project-status live"><span class="dot"></span>Live</span>
+          </div>
+          <div>
+            <h3 class="project-name">OmniLearn</h3>
+            <p class="project-tagline">LMS with FFmpeg transcoding. Team build.</p>
+            <p class="project-desc">Learning management system with HLS video streaming, an FFmpeg transcoding queue, AWS S3 presigned uploads, Razorpay payments, and dynamic PDF certificate generation via Brevo.</p>
+            <div class="project-tags"><span>MERN</span><span>FFmpeg</span><span>AWS S3</span><span>Razorpay</span><span>Brevo</span></div>
+          </div>
+          <div class="project-links">
+            <a href="https://mern-team-32.vercel.app" target="_blank">Live <span class="arr">↗</span></a>
+            <a href="https://github.com/Umesh-chandra-2006/MERN_TEAM-32" target="_blank">GitHub <span class="arr">↗</span></a>
+          </div>
         </div>
-        <div class="row-status dev">In development</div>
       </div>
 
-      <div class="row-item reveal">
-        <div class="row-num">06</div>
-        <div class="row-main">
-          <div class="row-name">PlaceIQ</div>
-          <div class="row-tagline">Multi-tenant placement platform. Solo build.</div>
-          <p class="row-desc">4-tier hierarchical RBAC (Super Admin → College Admin → Coordinator → Student) across 10 indexed MongoDB schemas and 65 REST endpoints. Hybrid ATS resume-scoring pipeline combining rule-based synonym matching with on-demand OpenRouter AI review, plus a Python/FastAPI scraper microservice, Twilio/email broadcast alerts, Cloudinary storage, and a 3-service Docker pipeline backed by 22 passing tests in CI.</p>
-          <div class="row-tags"><span>React</span><span>Node.js</span><span>FastAPI</span><span>MongoDB</span><span>OpenRouter API</span><span>Docker</span></div>
-          <div class="row-links"><a href="https://place-iq-six.vercel.app" target="_blank">Live <span class="arr">↗</span></a><a href="https://github.com/Umesh-chandra-2006/PlaceIQ" target="_blank">GitHub <span class="arr">↗</span></a></div>
+      <!-- Kairos -->
+      <div class="project-card featured reveal">
+        <div class="project-info">
+          <div class="project-meta">
+            <span class="project-num">06</span>
+            <span class="project-status dev">In Development</span>
+          </div>
+          <div>
+            <h3 class="project-name">Kairos</h3>
+            <p class="project-tagline">Placement preparation app. Solo build.</p>
+            <p class="project-desc">A daily AI-evaluated question app for engineering students. Employs active recall rather than passive reading. Users answer custom placement questions, get scored by Claude AI, and build streak metrics. Target: Tier-2/3 college prep.</p>
+            <div class="project-tags"><span>Claude API</span><span>React Native</span><span>Node.js</span><span>MongoDB</span></div>
+          </div>
+          <div class="project-links">
+            <a href="https://github.com/Umesh-chandra-2006/Kairos" target="_blank">GitHub <span class="arr">↗</span></a>
+          </div>
         </div>
-        <div class="row-status live"><span class="dot"></span>Live</div>
       </div>
 
     </div>
@@ -396,7 +587,7 @@ footer { padding: 48px 64px; border-top: 1px solid var(--rule); display: flex; a
 <section id="experience" class="chapter">
   <div class="chapter-numeral-bg">03</div>
   <div class="chapter-intro reveal">
-    <div class="chapter-label">03 — Experience</div>
+    <div class="chapter-label">03 — Work Timeline</div>
     <h2 class="chapter-title">Where I've <em>worked.</em></h2>
     <p class="chapter-desc">Three roles, most recent first.</p>
   </div>
@@ -465,7 +656,6 @@ footer { padding: 48px 64px; border-top: 1px solid var(--rule); display: flex; a
 <section id="credentials" class="chapter">
   <div class="chapter-numeral-bg">04</div>
   <div class="chapter-intro reveal">
-    <div class="chapter-label">04 — Credentials</div>
     <h2 class="chapter-title">Proof, <em>not claims.</em></h2>
   </div>
   <div class="chapter-body">
@@ -481,7 +671,6 @@ footer { padding: 48px 64px; border-top: 1px solid var(--rule); display: flex; a
 <section id="skills" class="chapter">
   <div class="chapter-numeral-bg">05</div>
   <div class="chapter-intro reveal">
-    <div class="chapter-label">05 — Stack</div>
     <h2 class="chapter-title">What I <em>reach for.</em></h2>
   </div>
   <div class="chapter-body">
@@ -500,7 +689,6 @@ footer { padding: 48px 64px; border-top: 1px solid var(--rule); display: flex; a
 <section id="contact" class="chapter">
   <div class="chapter-numeral-bg">06</div>
   <div class="chapter-intro reveal">
-    <div class="chapter-label">06 — Contact</div>
     <h2 class="contact-heading">Got something<br><em>interesting?</em></h2>
     <p class="contact-sub">If you're building something ambitious, want to talk engineering, or think I'd be a good fit — reach out.</p>
     <p class="contact-note">"Most of what I build starts as a system that doesn't exist yet — a judge with no server, a platform with no tenants. The interesting part is never the idea. It's making the thing hold up once real people start using it."</p>
@@ -723,7 +911,7 @@ document.addEventListener('mousemove', e => { cx = e.clientX; cy = e.clientY; })
   ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
   requestAnimationFrame(cursorLoop);
 })();
-document.querySelectorAll('a, .row-item').forEach(el => {
+document.querySelectorAll('a, .project-card, .exp-row, .cred-row, .contact-row').forEach(el => {
   el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
   el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
 });
