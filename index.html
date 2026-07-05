@@ -732,6 +732,44 @@ footer { padding: 48px 64px; border-top: 1px solid var(--rule); display: flex; a
   color: var(--text);
 }
 
+/* Quasar vertical gradient beam for skills section */
+#skills {
+  position: relative;
+}
+#skills::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+  opacity: 0.15;
+  z-index: 1;
+  pointer-events: none;
+  box-shadow: 0 0 12px rgba(232, 197, 71, 0.3);
+}
+
+/* Pulsar hover glow for credentials */
+.cred-row {
+  position: relative;
+  z-index: 1;
+}
+.cred-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 10% 50%, rgba(232, 197, 71, 0.02) 0%, transparent 60%);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.cred-row:hover::before {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 </style>
 </head>
@@ -1162,6 +1200,62 @@ footer { padding: 48px 64px; border-top: 1px solid var(--rule); display: flex; a
 try {
 (function() {
   const canvas = document.getElementById('bg-canvas');
+
+  // WebGL Support Check
+  function isWebGLSupported() {
+    try {
+      const c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+    } catch(e) {
+      return false;
+    }
+  }
+
+  // Canvas 2D Fallback for older browsers
+  function renderCanvas2DFallback() {
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const stars2d = [];
+    for (let i = 0; i < 150; i++) {
+      stars2d.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: 0.5 + Math.random() * 1.0,
+        alpha: 0.2 + Math.random() * 0.8
+      });
+    }
+    
+    function draw() {
+      ctx.fillStyle = '#040507';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#f2efe9';
+      stars2d.forEach(s => {
+        ctx.globalAlpha = s.alpha;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+    
+    draw();
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      draw();
+    });
+    console.log('WebGL not supported. Fallback static 2D starfield rendered.');
+  }
+
+  if (!isWebGLSupported()) {
+    renderCanvas2DFallback();
+    return;
+  }
+
+  // Accessibility Check: Respect reduced motion in JS
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1174,6 +1268,50 @@ try {
   const sceneGroup = new THREE.Group();
   scene.add(sceneGroup);
 
+  // SECTION CONFIGS DEFINITION (PRD Spec)
+  const SECTION_CONFIGS = [
+    { pos: 0.0,  density: 0.4, blackhole: 1.0, orbit: 0.0, nebula: 0.0, pulsar: 0.0, quasar: 0.0, color: '#8B7FFF' }, // Hero
+    { pos: 0.16, density: 0.3, blackhole: 0.0, orbit: 1.0, nebula: 0.0, pulsar: 0.0, quasar: 0.0, color: '#E8C547' }, // About
+    { pos: 0.33, density: 0.6, blackhole: 0.0, orbit: 0.0, nebula: 1.0, pulsar: 0.0, quasar: 0.0, color: '#4ECDC4' }, // Projects
+    { pos: 0.50, density: 0.3, blackhole: 0.0, orbit: 0.6, nebula: 0.4, pulsar: 0.0, quasar: 0.0, color: '#8B7FFF' }, // Experience
+    { pos: 0.66, density: 0.3, blackhole: 0.0, orbit: 0.0, nebula: 0.0, pulsar: 1.0, quasar: 0.0, color: '#E8C547' }, // Credentials
+    { pos: 0.83, density: 0.2, blackhole: 0.0, orbit: 0.0, nebula: 0.0, pulsar: 0.0, quasar: 1.0, color: '#4ECDC4' }, // Stack/Skills
+    { pos: 1.0,  density: 1.0, blackhole: 0.0, orbit: 0.0, nebula: 0.0, pulsar: 0.0, quasar: 0.0, color: '#E8C547' }  // Contact
+  ];
+
+  function getInterpolatedConfig(progress) {
+    progress = Math.max(0, Math.min(1, progress));
+    let lower = SECTION_CONFIGS[0];
+    let upper = SECTION_CONFIGS[SECTION_CONFIGS.length - 1];
+    
+    for (let i = 0; i < SECTION_CONFIGS.length - 1; i++) {
+      if (progress >= SECTION_CONFIGS[i].pos && progress <= SECTION_CONFIGS[i+1].pos) {
+        lower = SECTION_CONFIGS[i];
+        upper = SECTION_CONFIGS[i+1];
+        break;
+      }
+    }
+    
+    const range = upper.pos - lower.pos;
+    const factor = range > 0 ? (progress - lower.pos) / range : 0;
+    const lerp = (a, b, t) => a + (b - a) * t;
+    
+    const cLower = new THREE.Color(lower.color);
+    const cUpper = new THREE.Color(upper.color);
+    const color = cLower.clone().lerp(cUpper, factor);
+    
+    return {
+      density: lerp(lower.density, upper.density, factor),
+      blackhole: lerp(lower.blackhole, upper.blackhole, factor),
+      orbit: lerp(lower.orbit, upper.orbit, factor),
+      nebula: lerp(lower.nebula, upper.nebula, factor),
+      pulsar: lerp(lower.pulsar, upper.pulsar, factor),
+      quasar: lerp(lower.quasar, upper.quasar, factor),
+      color: color
+    };
+  }
+
+  // 1. STARFIELD INITIALIZATION
   const starCount = 900;
   const starPos = new Float32Array(starCount * 3);
   const starPhase = new Float32Array(starCount);
@@ -1187,13 +1325,18 @@ try {
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
   starGeo.setAttribute('phase', new THREE.BufferAttribute(starPhase, 1));
   const starMat = new THREE.ShaderMaterial({
-    uniforms: { time: { value: 0 } },
+    uniforms: { 
+      time: { value: 0 },
+      opacity: { value: 1.0 },
+      density: { value: 0.4 }
+    },
     vertexShader: `
       attribute float phase;
       varying float vTwinkle;
       uniform float time;
+      uniform float density;
       void main() {
-        vTwinkle = 0.4 + 0.6 * (0.5 + 0.5 * sin(time * 1.4 + phase * 6.0));
+        vTwinkle = (0.4 + 0.6 * (0.5 + 0.5 * sin(time * 1.4 + phase * 6.0))) * density;
         vec4 mv = modelViewMatrix * vec4(position, 1.0);
         gl_PointSize = (1.3 + vTwinkle) * (200.0 / -mv.z);
         gl_Position = projectionMatrix * mv;
@@ -1201,11 +1344,12 @@ try {
     `,
     fragmentShader: `
       varying float vTwinkle;
+      uniform float opacity;
       void main() {
         vec2 uv = gl_PointCoord - vec2(0.5);
         float d = length(uv);
         if (d > 0.5) discard;
-        float a = (1.0 - smoothstep(0.0, 0.5, d)) * vTwinkle;
+        float a = (1.0 - smoothstep(0.0, 0.5, d)) * vTwinkle * opacity;
         gl_FragColor = vec4(vec3(0.95, 0.94, 0.9), a);
       }
     `,
@@ -1214,6 +1358,7 @@ try {
   const stars = new THREE.Points(starGeo, starMat);
   sceneGroup.add(stars);
 
+  // 2. NEBULA INITIALIZATION
   const nebulaCount = 260;
   const nebPos = new Float32Array(nebulaCount * 3);
   const nebColor = new Float32Array(nebulaCount * 3);
@@ -1240,7 +1385,11 @@ try {
   nebGeo.setAttribute('color', new THREE.BufferAttribute(nebColor, 3));
   nebGeo.setAttribute('size', new THREE.BufferAttribute(nebSize, 1));
   const nebMat = new THREE.ShaderMaterial({
-    uniforms: { time: { value: 0 } },
+    uniforms: { 
+      time: { value: 0 },
+      opacity: { value: 0.0 },
+      tintColor: { value: new THREE.Color('#8B7FFF') }
+    },
     vertexShader: `
       attribute float size;
       varying vec3 vColor;
@@ -1257,11 +1406,14 @@ try {
     `,
     fragmentShader: `
       varying vec3 vColor;
+      uniform float opacity;
+      uniform vec3 tintColor;
       void main() {
         vec2 uv = gl_PointCoord - vec2(0.5);
         float d = length(uv);
-        float a = smoothstep(0.5, 0.0, d) * 0.10;
-        gl_FragColor = vec4(vColor, a);
+        float a = smoothstep(0.5, 0.0, d) * 0.10 * opacity;
+        vec3 finalCol = mix(vColor, tintColor, 0.5);
+        gl_FragColor = vec4(finalCol, a);
       }
     `,
     transparent: true, vertexColors: true, depthWrite: false, blending: THREE.AdditiveBlending,
@@ -1269,12 +1421,16 @@ try {
   const nebula = new THREE.Points(nebGeo, nebMat);
   sceneGroup.add(nebula);
 
+  // 3. BLACK HOLE INITIALIZATION (Hero)
   const holeGroup = new THREE.Group();
   holeGroup.position.set(7.5, -2.5, -9);
-  const core = new THREE.Mesh(new THREE.CircleGeometry(1.15, 48), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+  const core = new THREE.Mesh(new THREE.CircleGeometry(1.15, 48), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 1.0 }));
   holeGroup.add(core);
   const diskMat = new THREE.ShaderMaterial({
-    uniforms: { time: { value: 0 } },
+    uniforms: { 
+      time: { value: 0 },
+      opacity: { value: 1.0 }
+    },
     vertexShader: `
       varying vec2 vUv;
       void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
@@ -1282,6 +1438,7 @@ try {
     fragmentShader: `
       varying vec2 vUv;
       uniform float time;
+      uniform float opacity;
       void main() {
         vec2 c = vUv - vec2(0.5);
         float d = length(c) * 2.0;
@@ -1291,7 +1448,7 @@ try {
         vec3 gold = vec3(0.91, 0.77, 0.28);
         vec3 violet = vec3(0.55, 0.5, 1.0);
         vec3 col = mix(violet, gold, swirl);
-        gl_FragColor = vec4(col, ring * 0.55);
+        gl_FragColor = vec4(col, ring * 0.55 * opacity);
       }
     `,
     transparent: true, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false,
@@ -1301,6 +1458,61 @@ try {
   holeGroup.add(disk);
   sceneGroup.add(holeGroup);
 
+  // 4. ORBITING BODIES INITIALIZATION (About/Experience)
+  const orbitGroup = new THREE.Group();
+  orbitGroup.position.set(-7.5, 2.5, -9);
+  sceneGroup.add(orbitGroup);
+
+  const orbitCore = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 24, 24),
+    new THREE.MeshBasicMaterial({ color: 0xf2efe9, transparent: true, opacity: 0 })
+  );
+  orbitGroup.add(orbitCore);
+
+  const orbitersData = [
+    { r: 2.0, speed: 1.5, size: 0.14, color: 0xE8C547 },
+    { r: 3.0, speed: 1.0, size: 0.11, color: 0x4ECDC4 },
+    { r: 4.2, speed: 0.7, size: 0.15, color: 0x8B7FFF }
+  ];
+  const orbitMeshes = [];
+  orbitersData.forEach(data => {
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(data.size, 16, 16),
+      new THREE.MeshBasicMaterial({ color: data.color, transparent: true, opacity: 0 })
+    );
+    orbitGroup.add(mesh);
+    orbitMeshes.push({ mesh, r: data.r, speed: data.speed, phase: Math.random() * Math.PI * 2 });
+  });
+
+  // 5. PULSAR INITIALIZATION (Credentials)
+  const pulsarGroup = new THREE.Group();
+  pulsarGroup.position.set(7.5, 2.5, -9);
+  sceneGroup.add(pulsarGroup);
+  const pulsarMat = new THREE.MeshBasicMaterial({
+    color: 0x8B7FFF,
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide
+  });
+  const pulsarMesh = new THREE.Mesh(new THREE.CircleGeometry(2.0, 32), pulsarMat);
+  pulsarGroup.add(pulsarMesh);
+
+  // 6. QUASAR VERTICAL BEAM INITIALIZATION (Skills/Stack)
+  const quasarGroup = new THREE.Group();
+  quasarGroup.position.set(0, 0, -10);
+  sceneGroup.add(quasarGroup);
+  const quasarMat = new THREE.MeshBasicMaterial({
+    color: 0xE8C547,
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide
+  });
+  const quasarBeam = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 30, 8), quasarMat);
+  quasarGroup.add(quasarBeam);
+
+  // SCROLL & MOUSE CONTROLS
   let mouseX = 0, mouseY = 0, targetX = 0, targetY = 0;
   document.addEventListener('mousemove', e => {
     mouseX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -1321,19 +1533,73 @@ try {
     camera.updateProjectionMatrix();
   });
 
+  // Render static frame and halt loop if reduced motion is requested
+  if (prefersReducedMotion) {
+    starMat.uniforms.time.value = 0;
+    starMat.uniforms.density.value = 0.4;
+    starMat.uniforms.opacity.value = 1.0;
+    holeGroup.visible = true;
+    diskMat.uniforms.opacity.value = 0.5;
+    orbitGroup.visible = false;
+    nebula.visible = false;
+    quasarGroup.visible = false;
+    pulsarGroup.visible = false;
+    renderer.render(scene, camera);
+    console.log('Reduced motion active. Static starfield rendered.');
+    return;
+  }
+
   const clock = new THREE.Clock();
   function animate() {
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
+    
+    // Mouse ease tracking
     targetX += (mouseX - targetX) * 0.04;
     targetY += (mouseY - targetY) * 0.04;
+
+    // Fetch config values interpolated based on current scroll position
+    const config = getInterpolatedConfig(scrollProgress);
+
+    // Apply configuration values
     starMat.uniforms.time.value = t;
+    starMat.uniforms.density.value = config.density;
+    
     nebMat.uniforms.time.value = t;
+    nebMat.uniforms.opacity.value = config.nebula;
+    nebMat.uniforms.tintColor.value.copy(config.color);
+
     diskMat.uniforms.time.value = t;
+    diskMat.uniforms.opacity.value = config.blackhole;
+
+    // Toggle and adjust visibility/opacities of focal bodies
+    holeGroup.visible = (config.blackhole > 0.01);
+    core.material.opacity = config.blackhole;
+
+    orbitGroup.visible = (config.orbit > 0.01);
+    orbitCore.material.opacity = config.orbit * 0.7;
+    orbitMeshes.forEach(o => {
+      o.mesh.material.opacity = config.orbit;
+      o.phase += o.speed * 0.012;
+      o.mesh.position.x = Math.cos(o.phase) * o.r;
+      o.mesh.position.z = Math.sin(o.phase) * o.r;
+    });
+
+    quasarGroup.visible = (config.quasar > 0.01);
+    quasarMat.opacity = config.quasar * 0.7;
+
+    pulsarGroup.visible = (config.pulsar > 0.01);
+    const pulseFactor = 0.5 + 0.5 * Math.sin(t * 2.5);
+    pulsarMesh.scale.setScalar(1.0 + pulseFactor * 0.4);
+    pulsarMat.opacity = config.pulsar * (0.3 + 0.4 * pulseFactor);
+
+    // Overall Scene Group Rotation
     sceneGroup.rotation.y = targetX * 0.05 + scrollProgress * 0.35;
     sceneGroup.rotation.x = targetY * 0.03;
     holeGroup.rotation.z += 0.0018;
     disk.rotation.z += 0.0025;
+    quasarGroup.rotation.y += 0.002;
+
     renderer.render(scene, camera);
   }
   animate();
@@ -1349,24 +1615,31 @@ const ring = document.getElementById('cursor-ring');
 let cx = -100, cy = -100, rx = -100, ry = -100;
 let cursorVisible = false;
 
-document.addEventListener('mousemove', e => {
-  cx = e.clientX;
-  cy = e.clientY;
-  if (!cursorVisible) {
-    dot.style.opacity = '1';
-    ring.style.opacity = '1';
-    cursorVisible = true;
-  }
-});
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-(function cursorLoop() {
-  rx += (cx - rx) * 0.12;
-  ry += (cy - ry) * 0.12;
-  // Hardware accelerated translation using translate3d
-  dot.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
-  ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
-  requestAnimationFrame(cursorLoop);
-})();
+if (prefersReducedMotion) {
+  dot.style.display = 'none';
+  ring.style.display = 'none';
+} else {
+  document.addEventListener('mousemove', e => {
+    cx = e.clientX;
+    cy = e.clientY;
+    if (!cursorVisible) {
+      dot.style.opacity = '1';
+      ring.style.opacity = '1';
+      cursorVisible = true;
+    }
+  });
+
+  (function cursorLoop() {
+    rx += (cx - rx) * 0.12;
+    ry += (cy - ry) * 0.12;
+    // Hardware accelerated translation using translate3d
+    dot.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
+    ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+    requestAnimationFrame(cursorLoop);
+  })();
+}
 
 document.querySelectorAll('a, .project-card, .exp-row, .cred-row, .contact-row, button').forEach(el => {
   el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
