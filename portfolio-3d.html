@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Umesh Chandra — Builder</title>
+<link rel="icon" type="image/x-icon" href="./favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Newsreader:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #040507;
+  --gold:     #E8C547;
+  --gold2:    #c9a82e;
+  --violet:   #8B7FFF;
+  --teal:     #4ECDC4;
+  --text:     #f2efe9;
+  --muted:    #8c8a86;
+  --muted2:   #48464a;
+  --rule:     rgba(255,255,255,0.09);
+  --font-display: 'Cabinet Grotesk', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+  --font-serif:   'Newsreader', serif;
+}
+
+body { background: var(--bg); color: var(--text); font-family: var(--font-display); overflow-x: hidden; cursor: none; }
+
+/* CURSOR */
+#cursor-dot { position: fixed; width: 5px; height: 5px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .15s, height .15s; mix-blend-mode: difference; }
+#cursor-ring { position: fixed; width: 34px; height: 34px; border: 1px solid rgba(232,197,71,0.28); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: width .25s ease, height .25s ease, border-color .2s; }
+body.cursor-hover #cursor-dot { width: 10px; height: 10px; }
+body.cursor-hover #cursor-ring { width: 52px; height: 52px; border-color: var(--gold); }
+
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 75% 30%, rgba(139, 127, 255, 0.06) 0%, transparent 60%),
+              radial-gradient(circle at 25% 70%, rgba(232, 197, 71, 0.04) 0%, transparent 55%),
+              #040507;
+}
+body::after {
+  content: ''; position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9990; opacity: 0.4;
+}
+
+/* NAV — flat, text only, no boxes */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 500; padding: 30px 64px; display: flex; align-items: center; justify-content: space-between; mix-blend-mode: difference; }
+.nav-logo { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.04em; color: var(--text); }
+.nav-links { display: flex; gap: 40px; list-style: none; }
+.nav-links a { font-family: var(--font-mono); font-size: 10px; color: var(--text); text-decoration: none; letter-spacing: 0.12em; text-transform: uppercase; position: relative; padding-bottom: 3px; }
+.nav-links a::after { content: ''; position: absolute; left: 0; right: 100%; bottom: 0; height: 1px; background: var(--text); transition: right .3s ease; }
+.nav-links a:hover::after { right: 0; }
+.nav-cta { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); text-decoration: none; position: relative; padding-bottom: 3px; cursor: none; }
+.nav-cta::after { content: ''; position: absolute; left: 0; right: 100%; bottom: 0; height: 1px; background: var(--gold); transition: right .3s ease; }
+.nav-cta:hover::after { right: 0; }
+@media (max-width: 900px) { .nav-links { display: none; } }
+
+/* CHAPTER INDEX */
+#chapter-index { position: fixed; right: 40px; top: 50%; transform: translateY(-50%); z-index: 400; display: flex; flex-direction: column; gap: 22px; }
+.chapter-dot { display: flex; align-items: center; gap: 10px; justify-content: flex-end; text-decoration: none; cursor: none; }
+.chapter-dot .num { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); transition: color .3s; }
+.chapter-dot .bar { width: 14px; height: 1px; background: var(--muted2); transition: background .3s, width .3s; }
+.chapter-dot.active .num { color: var(--gold); }
+.chapter-dot.active .bar { background: var(--gold); width: 26px; }
+@media (max-width: 900px) { #chapter-index { display: none; } }
+
+main { position: relative; z-index: 2; }
+
+/* HERO — one big statement, minimal chrome */
+#hero { min-height: 100vh; padding: 0 64px; display: flex; flex-direction: column; justify-content: center; position: relative; }
+.hero-numeral {
+  position: absolute; top: 8vh; right: 4vw;
+  font-family: var(--font-mono); font-weight: 700; font-size: clamp(140px, 20vw, 300px);
+  color: rgba(255,255,255,0.035); line-height: 1; pointer-events: none; user-select: none; z-index: 0;
+}
+.hero-content { max-width: 1200px; position: relative; z-index: 2; }
+.hero-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 32px; }
+.hero-headline { font-family: var(--font-display); font-weight: 800; font-size: clamp(54px, 8.6vw, 128px); line-height: 0.9; letter-spacing: -0.035em; margin-bottom: 44px; }
+.hero-headline .italic-line { font-family: var(--font-serif); font-style: italic; font-weight: 300; color: var(--muted); display: block; }
+.hero-headline .gold-word { color: var(--gold); }
+.hero-sub { font-size: 18px; color: var(--muted); line-height: 1.75; max-width: 540px; margin-bottom: 56px; }
+.hero-sub strong { color: var(--text); font-weight: 600; }
+.hero-actions { display: flex; gap: 32px; align-items: center; margin-bottom: 90px; }
+.btn-primary { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); text-decoration: none; display: inline-flex; align-items: center; gap: 10px; cursor: none; }
+.btn-primary::after { content: '→'; transition: transform .25s; }
+.btn-primary:hover::after { transform: translateX(6px); }
+.btn-text { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: relative; padding-bottom: 3px; cursor: none; }
+.btn-text::after { content: ''; position: absolute; left: 0; right: 100%; bottom: 0; height: 1px; background: var(--muted); transition: right .3s; }
+.btn-text:hover { color: var(--text); }
+.btn-text:hover::after { right: 0; background: var(--text); }
+
+/* Bare stat strip — no boxes, hairline dividers */
+.stat-strip { display: flex; gap: 0; border-top: 1px solid var(--rule); max-width: 760px; }
+.stat-strip .stat { flex: 1; padding: 24px 32px 0 0; border-right: 1px solid var(--rule); }
+.stat-strip .stat:last-child { border-right: none; }
+.stat-num { font-family: var(--font-mono); font-size: 26px; font-weight: 500; display: block; }
+.stat-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; display: block; }
+
+/* CHAPTER OPENERS */
+.chapter { position: relative; padding: 200px 64px 0; }
+.chapter-numeral-bg {
+  position: absolute; top: 60px; right: 5vw;
+  font-family: var(--font-mono); font-weight: 700; font-size: clamp(140px, 18vw, 280px);
+  color: rgba(255,255,255,0.03); line-height: 1; pointer-events: none; user-select: none; z-index: 0;
+}
+.chapter-intro { max-width: 920px; margin-bottom: 110px; position: relative; z-index: 2; }
+.chapter-label { font-family: var(--font-mono); font-size: 11px; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 26px; }
+.chapter-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(42px, 6.2vw, 92px); line-height: 0.98; letter-spacing: -0.03em; margin-bottom: 28px; }
+.chapter-title em { font-family: var(--font-serif); font-style: italic; font-weight: 300; color: var(--muted); }
+.chapter-desc { font-size: 17px; color: var(--muted); line-height: 1.8; max-width: 640px; }
+.chapter-body { position: relative; z-index: 2; padding-bottom: 160px; }
+
+/* ROW LIST — editorial, hairline dividers, no boxes */
+.row-list { display: flex; flex-direction: column; }
+.row-item {
+  display: grid; grid-template-columns: 56px 1fr auto; gap: 40px;
+  padding: 40px 0; border-top: 1px solid var(--rule);
+  align-items: start; cursor: none; transition: padding-left .35s ease, background .35s ease;
+}
+.row-list .row-item:last-child { border-bottom: 1px solid var(--rule); }
+.row-item:hover { padding-left: 14px; background: rgba(255,255,255,0.012); }
+.row-num { font-family: var(--font-mono); font-size: 12px; color: var(--muted2); padding-top: 6px; }
+.row-main { min-width: 0; }
+.row-name { font-family: var(--font-display); font-size: clamp(22px, 2.6vw, 32px); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+.row-tagline { font-family: var(--font-serif); font-style: italic; font-size: 15px; color: var(--muted); margin-bottom: 18px; }
+.row-desc { font-size: 14px; color: var(--muted); line-height: 1.75; max-width: 640px; margin-bottom: 20px; }
+.row-tags { font-family: var(--font-mono); font-size: 11px; color: var(--muted2); letter-spacing: 0.03em; margin-bottom: 18px; }
+.row-tags span { color: var(--muted); }
+.row-tags span::after { content: ' / '; color: var(--muted2); }
+.row-tags span:last-child::after { content: ''; }
+.row-links { display: flex; gap: 22px; }
+.row-links a { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 0.06em; display: inline-flex; align-items: center; gap: 5px; transition: color .2s; }
+.row-links a:hover { color: var(--gold); }
+.row-links .arr { transition: transform .2s; }
+.row-links a:hover .arr { transform: translate(3px,-3px); }
+.row-status { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; text-align: right; white-space: nowrap; padding-top: 6px; display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.row-status.live { color: var(--teal); }
+.row-status.live .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); animation: pulse 2s ease infinite; }
+.row-status.dev { color: var(--violet); }
+.row-status.archived { color: var(--muted2); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+@media (max-width: 800px) {
+  .row-item { grid-template-columns: 1fr; gap: 12px; }
+  .row-status { text-align: left; justify-content: flex-start; }
+}
+
+/* ABOUT specific: text + bare fact list */
+.about-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 90px; }
+.about-text p { font-size: 17px; line-height: 1.85; color: var(--muted); margin-bottom: 24px; }
+.about-text p:first-child { color: var(--text); font-size: 19px; }
+.about-text strong { color: var(--text); font-weight: 600; }
+.fact-list { display: flex; flex-direction: column; }
+.fact-row { padding: 22px 0; border-top: 1px solid var(--rule); }
+.fact-list .fact-row:last-child { border-bottom: 1px solid var(--rule); }
+.fact-label { font-family: var(--font-mono); font-size: 9px; color: var(--muted2); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
+.fact-value { font-size: 15px; color: var(--text); font-weight: 600; }
+.fact-sub { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-top: 3px; }
+@media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+/* EXPERIENCE — editorial rows */
+.exp-row { display: grid; grid-template-columns: 210px 1fr; gap: 48px; padding: 48px 0; border-top: 1px solid var(--rule); }
+.exp-list .exp-row:last-child { border-bottom: 1px solid var(--rule); }
+.exp-org { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--gold); letter-spacing: 0.03em; }
+.exp-org-sub { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); letter-spacing: 0.05em; margin-top: 4px; }
+.exp-period { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); letter-spacing: 0.06em; margin-top: 14px; }
+.exp-badge { font-family: var(--font-mono); font-size: 9px; color: var(--muted2); letter-spacing: 0.06em; margin-top: 6px; }
+.exp-title { font-family: var(--font-display); font-size: clamp(22px, 2.4vw, 28px); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
+.exp-summary { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 20px; max-width: 580px; }
+.exp-bullets { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+.exp-bullets li { font-size: 13px; color: var(--muted); line-height: 1.65; padding-left: 18px; position: relative; }
+.exp-bullets li::before { content: '—'; position: absolute; left: 0; color: var(--muted2); font-family: var(--font-mono); }
+.exp-bullets li strong { color: var(--text); font-weight: 500; }
+.exp-tags { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.exp-tags span::after { content: ' / '; color: var(--muted2); }
+.exp-tags span:last-child::after { content: ''; }
+@media (max-width: 800px) { .exp-row { grid-template-columns: 1fr; gap: 14px; } }
+
+/* CREDENTIALS — editorial rows */
+.cred-row { display: grid; grid-template-columns: 220px 1fr auto; gap: 40px; padding: 36px 0; border-top: 1px solid var(--rule); align-items: start; }
+.creds-list .cred-row:last-child { border-bottom: 1px solid var(--rule); }
+.cred-org { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); letter-spacing: 0.1em; text-transform: uppercase; padding-top: 4px; }
+.cred-title { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; }
+.cred-detail { font-size: 13px; color: var(--muted); line-height: 1.65; max-width: 560px; }
+.cred-badge { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; padding-top: 4px; }
+.cred-badge.gold { color: var(--gold); }
+@media (max-width: 800px) { .cred-row { grid-template-columns: 1fr; gap: 10px; } }
+
+/* SKILLS — flat rows, minimal token style */
+.skills-row { display: grid; grid-template-columns: 170px 1fr; padding: 22px 0; border-top: 1px solid var(--rule); align-items: baseline; }
+.skills-layout .skills-row:last-child { border-bottom: 1px solid var(--rule); }
+.skills-row-label { font-family: var(--font-mono); font-size: 10px; color: var(--gold); letter-spacing: 0.16em; text-transform: uppercase; }
+.skills-pills { display: flex; flex-wrap: wrap; gap: 22px; }
+.skill-pill { font-family: var(--font-mono); font-size: 13px; color: var(--text); position: relative; padding-bottom: 2px; }
+.skill-pill.primary { color: var(--gold); }
+@media (max-width: 700px) { .skills-row { grid-template-columns: 1fr; gap: 10px; } }
+
+/* CONTACT */
+.contact-heading { font-family: var(--font-display); font-size: clamp(46px, 6.4vw, 96px); font-weight: 800; letter-spacing: -0.035em; line-height: 0.94; margin-bottom: 30px; }
+.contact-heading em { font-family: var(--font-serif); font-style: italic; font-weight: 300; color: var(--muted); }
+.contact-sub { font-size: 17px; color: var(--muted); line-height: 1.75; max-width: 620px; margin-bottom: 20px; }
+.contact-note { font-family: var(--font-serif); font-style: italic; font-size: 20px; color: var(--muted); line-height: 1.8; max-width: 720px; margin-bottom: 70px; }
+.contact-links { display: flex; flex-direction: column; }
+.contact-row { display: flex; align-items: baseline; justify-content: space-between; padding: 26px 0; border-top: 1px solid var(--rule); text-decoration: none; cursor: none; }
+.contact-links .contact-row:last-child { border-bottom: 1px solid var(--rule); }
+.contact-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); letter-spacing: 0.12em; text-transform: uppercase; }
+.contact-value { font-size: 20px; color: var(--text); font-family: var(--font-display); font-weight: 600; transition: color .25s; }
+.contact-row:hover .contact-value { color: var(--gold); }
+.contact-arr { font-size: 18px; color: var(--muted2); transition: color .2s, transform .2s; }
+.contact-row:hover .contact-arr { color: var(--gold); transform: translate(4px,-4px); }
+
+footer { padding: 48px 64px; border-top: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2; }
+.footer-copy, .footer-loc { font-family: var(--font-mono); font-size: 11px; color: var(--muted2); letter-spacing: 0.06em; }
+
+@media (max-width: 900px) {
+  #hero, .chapter { padding-left: 24px; padding-right: 24px; }
+  .chapter { padding-top: 130px; }
+  .stat-strip { flex-direction: column; }
+  .stat-strip .stat { border-right: none; border-top: 1px solid var(--rule); padding: 18px 0 0; }
+  .stat-strip .stat:first-child { border-top: none; }
+  footer { flex-direction: column; gap: 8px; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+</style>
+</head>
+<body>
+
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+<canvas id="bg-canvas"></canvas>
+
+<nav>
+  <img src="./favicon.ico" alt="UC" style="width:28px;height:28px;image-rendering:crisp-edges;">
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#credentials">Credentials</a></li>
+    <li><a href="#skills">Stack</a></li>
+  </ul>
+  <a href="mailto:thirumaniumeshchandra2006@gmail.com" class="nav-cta">Say hello</a>
+</nav>
+
+<nav id="chapter-index">
+  <a href="#about" class="chapter-dot" data-section="about"><span class="num">01</span><span class="bar"></span></a>
+  <a href="#projects" class="chapter-dot" data-section="projects"><span class="num">02</span><span class="bar"></span></a>
+  <a href="#experience" class="chapter-dot" data-section="experience"><span class="num">03</span><span class="bar"></span></a>
+  <a href="#credentials" class="chapter-dot" data-section="credentials"><span class="num">04</span><span class="bar"></span></a>
+  <a href="#skills" class="chapter-dot" data-section="skills"><span class="num">05</span><span class="bar"></span></a>
+  <a href="#contact" class="chapter-dot" data-section="contact"><span class="num">06</span><span class="bar"></span></a>
+</nav>
+
+<main>
+
+<section id="hero">
+  <div class="hero-numeral">00</div>
+  <div class="hero-content">
+    <div class="hero-eyebrow" id="hero-eyebrow">Pre-final year · Anurag University · Hyderabad</div>
+    <h1 class="hero-headline" id="hero-headline">
+      Building things<br>
+      <span class="italic-line">that actually</span>
+      <span class="gold-word">work.</span>
+    </h1>
+    <p class="hero-sub" id="hero-sub">
+      Currently AI Engineer Intern at <strong>IISPPR</strong>, building n8n LLM pipelines.
+      Ex-SWE intern at AlgoUniversity (YC-backed). I build full-stack products
+      and ship them — <strong>PlaceIQ</strong>, <strong>OmniLearn</strong>, <strong>Kairos</strong>.
+    </p>
+    <div class="hero-actions" id="hero-actions">
+      <a href="#projects" class="btn-primary">View projects</a>
+      <a href="https://github.com/Umesh-chandra-2006" target="_blank" class="btn-text">GitHub</a>
+    </div>
+    <div class="stat-strip" id="hero-stats">
+      <div class="stat"><span class="stat-num">150+</span><span class="stat-label">Users Served</span></div>
+      <div class="stat"><span class="stat-num">6</span><span class="stat-label">Shipped Projects</span></div>
+      <div class="stat"><span class="stat-num">Top 1.4%</span><span class="stat-label">of 40K applicants</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="chapter">
+  <div class="chapter-numeral-bg">01</div>
+  <div class="chapter-intro reveal">
+    <div class="chapter-label">01 — About</div>
+    <h2 class="chapter-title">Ships things. <em>Doesn't just demo them.</em></h2>
+    <p class="chapter-desc">Pre-final year CS student who'd rather deploy a rough version than polish a slide deck about one.</p>
+  </div>
+  <div class="chapter-body">
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>I'm a pre-final year Computer Science student at Anurag University, Hyderabad — with an <strong>8.49 CGPA</strong> and a bias toward building things that ship.</p>
+        <p>I work across the full stack — from REST APIs and databases to deployment pipelines and cloud infrastructure. I've built and deployed systems on <strong>AWS, Docker, and Kubernetes</strong>, integrated AI APIs into production apps, and shipped features under real deadlines with real teams.</p>
+        <p>Outside of work, I compete. Active on LeetCode, 250+ problems solved, and I think in terms of complexity and trade-offs as much as I think in terms of product.</p>
+      </div>
+      <div class="fact-list reveal">
+        <div class="fact-row"><div class="fact-label">Education</div><div class="fact-value">Anurag University</div><div class="fact-sub">B.Tech CSE · 8.49 CGPA · Pre-final year</div></div>
+        <div class="fact-row"><div class="fact-label">Currently</div><div class="fact-value">AI Engineer Intern @ IISPPR</div><div class="fact-sub">n8n LLM pipelines · through Aug 2026</div></div>
+        <div class="fact-row"><div class="fact-label">Location</div><div class="fact-value">Hyderabad, India</div><div class="fact-sub">Open to remote opportunities</div></div>
+        <div class="fact-row"><div class="fact-label">Competitive Programming</div><div class="fact-value">250+ problems solved</div><div class="fact-sub">LeetCode · HackerRank badges</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects" class="chapter">
+  <div class="chapter-numeral-bg">02</div>
+  <div class="chapter-intro reveal">
+    <div class="chapter-label">02 — Projects</div>
+    <h2 class="chapter-title">Six things I <em>actually built.</em></h2>
+    <p class="chapter-desc">Solo and team builds, ordered the way they happened — not curated for effect.</p>
+  </div>
+  <div class="chapter-body">
+    <div class="row-list">
+
+      <div class="row-item reveal">
+        <div class="row-num">01</div>
+        <div class="row-main">
+          <div class="row-name">Code Slayer</div>
+          <div class="row-tagline">A full-stack online judge. Solo build.</div>
+          <p class="row-desc">Production online judge that served 150+ users with 500+ submissions in its first month. Sandboxed C++/Python execution engine with hard TLE/MLE/CE detection (1,000ms timeout, 256MB RAM), a 3-scenario Gemini AI code reviewer, and JWT + RBAC auth. Domain no longer active — code and architecture live on GitHub.</p>
+          <div class="row-tags"><span>AWS EC2/ECR</span><span>React</span><span>Node.js</span><span>Docker</span><span>MongoDB</span><span>Gemini API</span></div>
+          <div class="row-links"><a href="https://github.com/Umesh-chandra-2006/Code_Slayer" target="_blank">GitHub <span class="arr">↗</span></a></div>
+        </div>
+        <div class="row-status archived">Archived</div>
+      </div>
+
+      <div class="row-item reveal">
+        <div class="row-num">02</div>
+        <div class="row-main">
+          <div class="row-name">MarketPulse-X</div>
+          <div class="row-tagline">6-agent AI pipeline, built at a Guinness World Record hackathon. Team build.</div>
+          <p class="row-desc">Supply chain risk intelligence platform built at Google Agentathon (15,000+ participants, GWR event). Owned the LangGraph multi-agent architecture and state management while teammates built the SEC EDGAR integration and GKE deployment. Autonomous confidence loop re-triggers upstream agents on low-confidence analyses (below 70%).</p>
+          <div class="row-tags"><span>LangGraph</span><span>FastAPI</span><span>Kubernetes</span><span>SEC EDGAR</span><span>GWR Event</span></div>
+          <div class="row-links"><a href="https://github.com/Jaswanth-K1210/MarketPulse" target="_blank">GitHub <span class="arr">↗</span></a><a href="https://market-pulse-jet.vercel.app" target="_blank">Live <span class="arr">↗</span></a></div>
+        </div>
+        <div class="row-status dev">Hackathon</div>
+      </div>
+
+      <div class="row-item reveal">
+        <div class="row-num">03</div>
+        <div class="row-main">
+          <div class="row-name">Blog</div>
+          <div class="row-tagline">MERN blogging platform. Solo build.</div>
+          <p class="row-desc">Full-stack blog platform with role-based access across User, Author, and Admin tiers, JWT authentication, and a commenting system.</p>
+          <div class="row-tags"><span>React</span><span>Node.js</span><span>MongoDB</span><span>JWT</span></div>
+          <div class="row-links"><a href="https://blog-woad-eight-95.vercel.app" target="_blank">Live <span class="arr">↗</span></a><a href="https://github.com/Umesh-chandra-2006/blog" target="_blank">GitHub <span class="arr">↗</span></a></div>
+        </div>
+        <div class="row-status live"><span class="dot"></span>Live</div>
+      </div>
+
+      <div class="row-item reveal">
+        <div class="row-num">04</div>
+        <div class="row-main">
+          <div class="row-name">OmniLearn</div>
+          <div class="row-tagline">Full-featured LMS. Team build.</div>
+          <p class="row-desc">Learning management system with HLS video streaming, an FFmpeg transcoding queue, AWS S3 presigned uploads, Razorpay payments, and dynamic PDF certificate generation via Brevo. Role-based access across Student, Instructor, and Admin tiers.</p>
+          <div class="row-tags"><span>MERN</span><span>FFmpeg</span><span>AWS S3</span><span>Razorpay</span><span>Brevo</span></div>
+          <div class="row-links"><a href="https://mern-team-32.vercel.app" target="_blank">Live <span class="arr">↗</span></a><a href="https://github.com/Umesh-chandra-2006/MERN_TEAM-32" target="_blank">GitHub <span class="arr">↗</span></a></div>
+        </div>
+        <div class="row-status live"><span class="dot"></span>Live</div>
+      </div>
+
+      <div class="row-item reveal">
+        <div class="row-num">05</div>
+        <div class="row-main">
+          <div class="row-name">Kairos</div>
+          <div class="row-tagline">The opportune moment for placement prep. Solo build.</div>
+          <p class="row-desc">A daily AI-evaluated question app for engineering students. Active recall, not passive content. Answer a question, get scored by Claude, build a streak. Built for Tier-2/3 students who don't have coaching centres.</p>
+          <div class="row-tags"><span>Claude API</span><span>React Native</span><span>Node.js</span><span>MongoDB</span></div>
+          <div class="row-links"><a href="https://github.com/Umesh-chandra-2006/Kairos" target="_blank">GitHub <span class="arr">↗</span></a></div>
+        </div>
+        <div class="row-status dev">In development</div>
+      </div>
+
+      <div class="row-item reveal">
+        <div class="row-num">06</div>
+        <div class="row-main">
+          <div class="row-name">PlaceIQ</div>
+          <div class="row-tagline">Multi-tenant placement platform. Solo build.</div>
+          <p class="row-desc">4-tier hierarchical RBAC (Super Admin → College Admin → Coordinator → Student) across 10 indexed MongoDB schemas and 65 REST endpoints. Hybrid ATS resume-scoring pipeline combining rule-based synonym matching with on-demand OpenRouter AI review, plus a Python/FastAPI scraper microservice, Twilio/email broadcast alerts, Cloudinary storage, and a 3-service Docker pipeline backed by 22 passing tests in CI.</p>
+          <div class="row-tags"><span>React</span><span>Node.js</span><span>FastAPI</span><span>MongoDB</span><span>OpenRouter API</span><span>Docker</span></div>
+          <div class="row-links"><a href="https://place-iq-six.vercel.app" target="_blank">Live <span class="arr">↗</span></a><a href="https://github.com/Umesh-chandra-2006/PlaceIQ" target="_blank">GitHub <span class="arr">↗</span></a></div>
+        </div>
+        <div class="row-status live"><span class="dot"></span>Live</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="experience" class="chapter">
+  <div class="chapter-numeral-bg">03</div>
+  <div class="chapter-intro reveal">
+    <div class="chapter-label">03 — Experience</div>
+    <h2 class="chapter-title">Where I've <em>worked.</em></h2>
+    <p class="chapter-desc">Three roles, most recent first.</p>
+  </div>
+  <div class="chapter-body">
+    <div class="exp-list">
+
+      <div class="exp-row reveal">
+        <div>
+          <div class="exp-org">IISPPR</div>
+          <div class="exp-org-sub">Intl. Institute of SDGs &amp; Public Policy Research</div>
+          <div class="exp-period">May 2026 – Aug 2026</div>
+          <div class="exp-badge">Remote · Ongoing</div>
+        </div>
+        <div>
+          <h3 class="exp-title">AI Engineer Intern</h3>
+          <p class="exp-summary">Building LLM-orchestrated automation pipelines in n8n, extending an existing internal workflow system while shipping new agent pipelines from scratch.</p>
+          <ul class="exp-bullets">
+            <li>Built a <strong>3-agent</strong> academic-text generation pipeline in n8n: a rewriting agent, a verifier agent that checks the rewrite against the source, and a refinement agent that injects domain keywords while preserving semantic meaning</li>
+            <li>Extended and maintained existing internal n8n-based AI automation workflows alongside building new pipelines from scratch, working within the team's established system architecture and conventions</li>
+          </ul>
+          <div class="exp-tags"><span>n8n</span><span>LLM Pipelines</span><span>Multi-agent Systems</span><span>Prompt Engineering</span></div>
+        </div>
+      </div>
+
+      <div class="exp-row reveal">
+        <div>
+          <div class="exp-org">Slayyers</div>
+          <div class="exp-org-sub">Quick Fashion Delivery</div>
+          <div class="exp-period">Jul – Dec 2025</div>
+          <div class="exp-badge">Remote</div>
+        </div>
+        <div>
+          <h3 class="exp-title">Software Engineer Intern</h3>
+          <p class="exp-summary">Built and scaled core platform features for a fast-fashion delivery startup, owning backend APIs, caching infrastructure, and CI/CD.</p>
+          <ul class="exp-bullets">
+            <li>Architected and shipped RESTful microservices for a <strong>60-minute delivery</strong> platform: <strong>Try-First-Buy-Later</strong> checkout flow, real-time order tracking, and logistics routing pipeline — each deployed independently to production</li>
+            <li>Implemented <strong>Redis</strong>-based caching that cut API response latency by over <strong>40%</strong>; architected MongoDB and PostgreSQL schemas and deployed services on AWS</li>
+            <li>Maintained CI/CD pipelines and authored unit/integration test suites across the full deployment lifecycle, ensuring zero-downtime releases</li>
+          </ul>
+          <div class="exp-tags"><span>Node.js</span><span>Redis</span><span>MongoDB</span><span>PostgreSQL</span><span>AWS</span><span>CI/CD</span></div>
+        </div>
+      </div>
+
+      <div class="exp-row reveal">
+        <div>
+          <div class="exp-org">AlgoUniversity</div>
+          <div class="exp-org-sub">Y-Combinator backed</div>
+          <div class="exp-period">May – Jul 2025</div>
+          <div class="exp-badge">Remote</div>
+        </div>
+        <div>
+          <h3 class="exp-title">Software Engineer Co-op Intern</h3>
+          <p class="exp-summary">Selected from 40,000+ applicants (top 1.4%) for a production-focused co-op. Solo-built and shipped a full online judge platform from scratch in 10 weeks.</p>
+          <ul class="exp-bullets">
+            <li>Independently designed and deployed a production online judge serving <strong>150+ students</strong>, coordinating with peers on shared architecture standards while owning the full build — sandboxed C++/Python execution engine with hard <strong>TLE/MLE/CE</strong> detection</li>
+            <li>Shipped <strong>3 production features</strong> across Agile sprints, including a rate-limiting layer that eliminated abuse vectors on the submission API; each feature cleared code review and deployed to production within sprint scope</li>
+          </ul>
+          <div class="exp-tags"><span>Node.js</span><span>REST APIs</span><span>AWS EC2/ECR</span><span>Docker</span><span>MongoDB</span><span>React</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="credentials" class="chapter">
+  <div class="chapter-numeral-bg">04</div>
+  <div class="chapter-intro reveal">
+    <div class="chapter-label">04 — Credentials</div>
+    <h2 class="chapter-title">Proof, <em>not claims.</em></h2>
+  </div>
+  <div class="chapter-body">
+    <div class="creds-list">
+      <div class="cred-row reveal"><div class="cred-org">AlgoUniversity · YC-backed</div><div><div class="cred-title">Accelerator — Top 1.4% of 40,000</div><div class="cred-detail">Production-focused DSA and systems curriculum. Mentorship from engineers at Google, Apple, Grab, and Alphagrep.</div></div><div class="cred-badge gold">Top cohort</div></div>
+      <div class="cred-row reveal"><div class="cred-org">Google</div><div><div class="cred-title">Agentathon Participant</div><div class="cred-detail">Guinness World Record — largest AI hackathon (15,000+ participants). Built MarketPulse-X: 6-agent supply chain intelligence pipeline on Kubernetes.</div></div><div class="cred-badge gold">GWR event</div></div>
+      <div class="cred-row reveal"><div class="cred-org">Google Cloud</div><div><div class="cred-title">25 Skill Badges</div><div class="cred-detail">Gemini Application Development, Multimodal RAG, MLOps for Generative AI, and Responsible AI.</div></div><div class="cred-badge">Verified</div></div>
+      <div class="cred-row reveal"><div class="cred-org">Suntek · Institution-wide</div><div><div class="cred-title">MERN Stack Training</div><div class="cred-detail">Selected among 150 students across all branches institution-wide. Industry-led full-stack development program.</div></div><div class="cred-badge">Completed</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="skills" class="chapter">
+  <div class="chapter-numeral-bg">05</div>
+  <div class="chapter-intro reveal">
+    <div class="chapter-label">05 — Stack</div>
+    <h2 class="chapter-title">What I <em>reach for.</em></h2>
+  </div>
+  <div class="chapter-body">
+    <div class="skills-layout">
+      <div class="skills-row reveal"><div class="skills-row-label">Languages</div><div class="skills-pills"><span class="skill-pill primary">C++</span><span class="skill-pill primary">Python</span><span class="skill-pill primary">JavaScript</span><span class="skill-pill">Java</span><span class="skill-pill">C</span></div></div>
+      <div class="skills-row reveal"><div class="skills-row-label">Frontend</div><div class="skills-pills"><span class="skill-pill primary">React</span><span class="skill-pill">Tailwind CSS</span><span class="skill-pill">React Native</span><span class="skill-pill">Zustand</span><span class="skill-pill">HTML / CSS</span><span class="skill-pill">Three.js</span></div></div>
+      <div class="skills-row reveal"><div class="skills-row-label">Backend</div><div class="skills-pills"><span class="skill-pill primary">Node.js</span><span class="skill-pill primary">Express.js</span><span class="skill-pill">FastAPI</span><span class="skill-pill">REST APIs</span><span class="skill-pill">WebSockets</span></div></div>
+      <div class="skills-row reveal"><div class="skills-row-label">Databases</div><div class="skills-pills"><span class="skill-pill primary">MongoDB</span><span class="skill-pill">Redis</span><span class="skill-pill">PostgreSQL</span><span class="skill-pill">MySQL</span></div></div>
+      <div class="skills-row reveal"><div class="skills-row-label">Cloud & DevOps</div><div class="skills-pills"><span class="skill-pill primary">Docker</span><span class="skill-pill primary">AWS (EC2, ECR, S3)</span><span class="skill-pill">Kubernetes (GKE)</span><span class="skill-pill">Vercel</span><span class="skill-pill">Render</span><span class="skill-pill">Cloudinary</span></div></div>
+      <div class="skills-row reveal"><div class="skills-row-label">AI / Agents</div><div class="skills-pills"><span class="skill-pill primary">LangGraph</span><span class="skill-pill primary">n8n</span><span class="skill-pill">Multi-agent Pipelines</span><span class="skill-pill">Gemini API</span><span class="skill-pill">Claude API</span><span class="skill-pill">OpenRouter API</span></div></div>
+      <div class="skills-row reveal"><div class="skills-row-label">Integrations</div><div class="skills-pills"><span class="skill-pill">FFmpeg</span><span class="skill-pill">HLS Streaming</span><span class="skill-pill">Razorpay</span><span class="skill-pill">Brevo</span><span class="skill-pill">Twilio</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="chapter">
+  <div class="chapter-numeral-bg">06</div>
+  <div class="chapter-intro reveal">
+    <div class="chapter-label">06 — Contact</div>
+    <h2 class="contact-heading">Got something<br><em>interesting?</em></h2>
+    <p class="contact-sub">If you're building something ambitious, want to talk engineering, or think I'd be a good fit — reach out.</p>
+    <p class="contact-note">"Most of what I build starts as a system that doesn't exist yet — a judge with no server, a platform with no tenants. The interesting part is never the idea. It's making the thing hold up once real people start using it."</p>
+  </div>
+  <div class="chapter-body">
+    <div class="contact-links reveal">
+      <a href="mailto:thirumaniumeshchandra2006@gmail.com" class="contact-row"><span class="contact-label">Email</span><span class="contact-value">thirumaniumeshchandra2006@gmail.com</span><span class="contact-arr">↗</span></a>
+      <a href="https://www.linkedin.com/in/tirumani-umesh-chandra-b3b5b8314/" target="_blank" class="contact-row"><span class="contact-label">LinkedIn</span><span class="contact-value">umesh-chandra</span><span class="contact-arr">↗</span></a>
+      <a href="https://github.com/Umesh-chandra-2006" target="_blank" class="contact-row"><span class="contact-label">GitHub</span><span class="contact-value">Umesh-chandra-2006</span><span class="contact-arr">↗</span></a>
+      <a href="https://place-iq-six.vercel.app" target="_blank" class="contact-row"><span class="contact-label">Live work</span><span class="contact-value">PlaceIQ</span><span class="contact-arr">↗</span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <span class="footer-copy">© 2026 Umesh Chandra</span>
+  <span class="footer-loc">Hyderabad, India · Open to opportunities</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+try {
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 0);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 15);
+
+  const sceneGroup = new THREE.Group();
+  scene.add(sceneGroup);
+
+  const starCount = 900;
+  const starPos = new Float32Array(starCount * 3);
+  const starPhase = new Float32Array(starCount);
+  for (let i = 0; i < starCount; i++) {
+    starPos[i*3]   = (Math.random() - 0.5) * 50;
+    starPos[i*3+1] = (Math.random() - 0.5) * 34;
+    starPos[i*3+2] = (Math.random() - 0.5) * 26 - 6;
+    starPhase[i] = Math.random() * Math.PI * 2;
+  }
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  starGeo.setAttribute('phase', new THREE.BufferAttribute(starPhase, 1));
+  const starMat = new THREE.ShaderMaterial({
+    uniforms: { time: { value: 0 } },
+    vertexShader: `
+      attribute float phase;
+      varying float vTwinkle;
+      uniform float time;
+      void main() {
+        vTwinkle = 0.4 + 0.6 * (0.5 + 0.5 * sin(time * 1.4 + phase * 6.0));
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = (1.3 + vTwinkle) * (200.0 / -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: `
+      varying float vTwinkle;
+      void main() {
+        vec2 uv = gl_PointCoord - vec2(0.5);
+        float d = length(uv);
+        if (d > 0.5) discard;
+        float a = (1.0 - smoothstep(0.0, 0.5, d)) * vTwinkle;
+        gl_FragColor = vec4(vec3(0.95, 0.94, 0.9), a);
+      }
+    `,
+    transparent: true, depthWrite: false,
+  });
+  const stars = new THREE.Points(starGeo, starMat);
+  sceneGroup.add(stars);
+
+  const nebulaCount = 260;
+  const nebPos = new Float32Array(nebulaCount * 3);
+  const nebColor = new Float32Array(nebulaCount * 3);
+  const nebSize = new Float32Array(nebulaCount);
+  const goldC = new THREE.Color('#E8C547');
+  const violetC = new THREE.Color('#8B7FFF');
+  const tealC = new THREE.Color('#4ECDC4');
+  for (let i = 0; i < nebulaCount; i++) {
+    const cluster = Math.random();
+    let cx, cy, cz;
+    if (cluster < 0.5) { cx = -9; cy = 2; cz = -9; }
+    else if (cluster < 0.8) { cx = 8; cy = -4; cz = -11; }
+    else { cx = 2; cy = 6; cz = -10; }
+    nebPos[i*3]   = cx + (Math.random() - 0.5) * 9;
+    nebPos[i*3+1] = cy + (Math.random() - 0.5) * 7;
+    nebPos[i*3+2] = cz + (Math.random() - 0.5) * 6;
+    const r = Math.random();
+    const c = r < 0.4 ? violetC : (r < 0.7 ? tealC : goldC);
+    nebColor[i*3] = c.r; nebColor[i*3+1] = c.g; nebColor[i*3+2] = c.b;
+    nebSize[i] = Math.random() * 9 + 4;
+  }
+  const nebGeo = new THREE.BufferGeometry();
+  nebGeo.setAttribute('position', new THREE.BufferAttribute(nebPos, 3));
+  nebGeo.setAttribute('color', new THREE.BufferAttribute(nebColor, 3));
+  nebGeo.setAttribute('size', new THREE.BufferAttribute(nebSize, 1));
+  const nebMat = new THREE.ShaderMaterial({
+    uniforms: { time: { value: 0 } },
+    vertexShader: `
+      attribute float size;
+      varying vec3 vColor;
+      uniform float time;
+      void main() {
+        vColor = color;
+        vec3 pos = position;
+        pos.x += sin(time * 0.08 + position.y * 0.15) * 0.6;
+        pos.y += cos(time * 0.07 + position.x * 0.12) * 0.5;
+        vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+        gl_PointSize = size * (180.0 / -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() {
+        vec2 uv = gl_PointCoord - vec2(0.5);
+        float d = length(uv);
+        float a = smoothstep(0.5, 0.0, d) * 0.10;
+        gl_FragColor = vec4(vColor, a);
+      }
+    `,
+    transparent: true, vertexColors: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  const nebula = new THREE.Points(nebGeo, nebMat);
+  sceneGroup.add(nebula);
+
+  const holeGroup = new THREE.Group();
+  holeGroup.position.set(7.5, -2.5, -9);
+  const core = new THREE.Mesh(new THREE.CircleGeometry(1.15, 48), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+  holeGroup.add(core);
+  const diskMat = new THREE.ShaderMaterial({
+    uniforms: { time: { value: 0 } },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      uniform float time;
+      void main() {
+        vec2 c = vUv - vec2(0.5);
+        float d = length(c) * 2.0;
+        float ring = smoothstep(0.42, 0.55, d) * (1.0 - smoothstep(0.55, 1.0, d));
+        float angle = atan(c.y, c.x);
+        float swirl = 0.5 + 0.5 * sin(angle * 3.0 + time * 0.6 - d * 4.0);
+        vec3 gold = vec3(0.91, 0.77, 0.28);
+        vec3 violet = vec3(0.55, 0.5, 1.0);
+        vec3 col = mix(violet, gold, swirl);
+        gl_FragColor = vec4(col, ring * 0.55);
+      }
+    `,
+    transparent: true, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const disk = new THREE.Mesh(new THREE.RingGeometry(1.2, 2.6, 64), diskMat);
+  disk.rotation.x = Math.PI / 2.4;
+  holeGroup.add(disk);
+  sceneGroup.add(holeGroup);
+
+  let mouseX = 0, mouseY = 0, targetX = 0, targetY = 0;
+  document.addEventListener('mousemove', e => {
+    mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+    mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+  });
+
+  let scrollProgress = 0;
+  function updateScroll() {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    scrollProgress = h > 0 ? window.scrollY / h : 0;
+  }
+  window.addEventListener('scroll', updateScroll, { passive: true });
+  updateScroll();
+
+  window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+
+  const clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+    targetX += (mouseX - targetX) * 0.04;
+    targetY += (mouseY - targetY) * 0.04;
+    starMat.uniforms.time.value = t;
+    nebMat.uniforms.time.value = t;
+    diskMat.uniforms.time.value = t;
+    sceneGroup.rotation.y = targetX * 0.05 + scrollProgress * 0.35;
+    sceneGroup.rotation.x = targetY * 0.03;
+    holeGroup.rotation.z += 0.0018;
+    disk.rotation.z += 0.0025;
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+} catch (err) {
+  console.error('Space scene failed to initialize:', err);
+}
+</script>
+
+<script>
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let cx = 0, cy = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { cx = e.clientX; cy = e.clientY; });
+(function cursorLoop() {
+  rx += (cx - rx) * 0.12;
+  ry += (cy - ry) * 0.12;
+  dot.style.left = cx + 'px'; dot.style.top = cy + 'px';
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(cursorLoop);
+})();
+document.querySelectorAll('a, .row-item').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+});
+
+const heroEls = ['#hero-eyebrow', '#hero-headline', '#hero-sub', '#hero-actions', '#hero-stats'];
+const revealEls = document.querySelectorAll('.reveal');
+
+function forceVisible() {
+  heroEls.forEach(sel => { const el = document.querySelector(sel); if (el) el.style.opacity = 1; });
+  revealEls.forEach(el => { el.style.opacity = 1; el.style.transform = 'none'; });
+}
+
+if (typeof gsap === 'undefined') {
+  forceVisible();
+} else {
+  try {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const tl = gsap.timeline({ delay: 0.15 });
+    heroEls.forEach((sel, i) => {
+      tl.fromTo(sel, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.75, ease: 'power3.out' }, i === 0 ? 0 : '-=0.45');
+    });
+
+    revealEls.forEach(el => {
+      gsap.fromTo(el, { opacity: 0, y: 36 }, {
+        opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' }
+      });
+    });
+
+    const chapterDots = document.querySelectorAll('.chapter-dot');
+    const sections = ['about','projects','experience','credentials','skills','contact'].map(id => document.getElementById(id));
+    ScrollTrigger.create({
+      trigger: sections[0], start: 'top center', end: () => document.body.scrollHeight,
+      onUpdate: () => {
+        let activeIdx = 0;
+        sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top < window.innerHeight * 0.5) activeIdx = i; });
+        chapterDots.forEach((d, i) => d.classList.toggle('active', i === activeIdx));
+      }
+    });
+  } catch (err) {
+    console.error('GSAP animation failed:', err);
+    forceVisible();
+  }
+}
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
+});
+</script>
+</body>
+</html>
