@@ -7,93 +7,140 @@ export default function CelestialBodies({ scrollProgress, activeSection, mousePo
   const pointsRef = useRef();
   const groupRef = useRef();
 
-  // Create particle positions, colors, and initial states
-  const particleCount = 3000;
-  const [positions, colors, sizes, phases, velocities] = useMemo(() => {
+  const particleCount = 35000;
+
+  // Generate a double-arm spiral galaxy layout
+  const [positions, colors, phases, radii, originalY] = useMemo(() => {
     const pos = new Float32Array(particleCount * 3);
     const cols = new Float32Array(particleCount * 3);
-    const sz = new Float32Array(particleCount);
     const phs = new Float32Array(particleCount);
-    const vls = new Float32Array(particleCount * 3);
+    const rads = new Float32Array(particleCount);
+    const origY = new Float32Array(particleCount);
 
     const cyan = new THREE.Color("#00d4ff");
     const purple = new THREE.Color("#7c3aed");
     const magenta = new THREE.Color("#a855f7");
     const gold = new THREE.Color("#fbbf24");
-    const white = new THREE.Color("#e2e8f0");
+    const white = new THREE.Color("#f8fafc");
 
     for (let i = 0; i < particleCount; i++) {
-      // Spanned distribution in space
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 0.5 + Math.random() * 8;
-      
-      pos[i * 3] = Math.cos(angle) * radius;
-      pos[i * 3 + 1] = (Math.random() * 2 - 1) * 2;
-      pos[i * 3 + 2] = Math.sin(angle) * radius;
-
-      // Color distribution (default violet/cyan blend)
-      const mixColor = Math.random() > 0.5 ? cyan : purple;
-      cols[i * 3] = mixColor.r;
-      cols[i * 3 + 1] = mixColor.g;
-      cols[i * 3 + 2] = mixColor.b;
-
-      sz[i] = 0.05 + Math.random() * 0.15;
+      const idx = i * 3;
       phs[i] = Math.random() * Math.PI * 2;
 
-      // Velocity vectors for drift
-      vls[i * 3] = (Math.random() * 2 - 1) * 0.02;
-      vls[i * 3 + 1] = (Math.random() * 2 - 1) * 0.02;
-      vls[i * 3 + 2] = (Math.random() * 2 - 1) * 0.02;
+      // 1. Distribute particles into Bulge, Arms, or Halo Haze
+      if (i < 8000) {
+        // --- CENTRAL BULGE (Dense sphere at the center) ---
+        const radius = Math.pow(Math.random(), 2) * 1.5; // Dense core falloff
+        const u = Math.random();
+        const v = Math.random();
+        const theta = u * 2.0 * Math.PI;
+        const phi = Math.acos(2.0 * v - 1.0);
+
+        pos[idx] = radius * Math.sin(phi) * Math.cos(theta);
+        pos[idx + 1] = radius * Math.sin(phi) * Math.sin(theta) * 0.7; // slightly flattened
+        pos[idx + 2] = radius * Math.cos(phi);
+
+        rads[i] = radius;
+        origY[i] = pos[idx + 1];
+
+        // Central bulge colors: hot white core blending to warm gold
+        const targetColor = Math.random() > 0.4 ? white : gold;
+        cols[idx] = targetColor.r;
+        cols[idx + 1] = targetColor.g;
+        cols[idx + 2] = targetColor.b;
+
+      } else if (i < 30000) {
+        // --- SPIRAL ARMS (Double logarithmic spiral) ---
+        const armIndex = i % 2; // 2 distinct arms
+        const angleOffset = armIndex * Math.PI; // Offset second arm by 180 degrees
+        
+        // Logarithmic spiral math: theta determines radius
+        const theta = Math.random() * 8.0; // curl intensity
+        const radius = 1.0 + theta * 1.2; // radius increases with curl angle
+        
+        // Add random scatter to make arms volumetric
+        const scatterX = (Math.random() - 0.5) * (0.8 + theta * 0.15);
+        const scatterY = (Math.random() - 0.5) * (0.3 + theta * 0.05);
+        const scatterZ = (Math.random() - 0.5) * (0.8 + theta * 0.15);
+
+        const x = Math.cos(theta + angleOffset) * radius + scatterX;
+        const z = Math.sin(theta + angleOffset) * radius + scatterZ;
+        const y = scatterY;
+
+        pos[idx] = x;
+        pos[idx + 1] = y;
+        pos[idx + 2] = z;
+
+        rads[i] = Math.sqrt(x*x + z*z);
+        origY[i] = y;
+
+        // Spiral arm colors: cyan inner arm, purple/magenta outer arm
+        let targetColor;
+        if (radius < 4.0) {
+          targetColor = Math.random() > 0.5 ? cyan : purple;
+        } else {
+          targetColor = Math.random() > 0.4 ? purple : magenta;
+        }
+
+        cols[idx] = targetColor.r;
+        cols[idx + 1] = targetColor.g;
+        cols[idx + 2] = targetColor.b;
+
+      } else {
+        // --- STAR HALO HAZE (Wide sparse background stars) ---
+        const radius = 4.0 + Math.random() * 15.0;
+        const angle = Math.random() * Math.PI * 2;
+        
+        pos[idx] = Math.cos(angle) * radius;
+        pos[idx + 1] = (Math.random() - 0.5) * 3.0; // thin disk
+        pos[idx + 2] = Math.sin(angle) * radius;
+
+        rads[i] = radius;
+        origY[i] = pos[idx + 1];
+
+        // Background stars: cool blue-white
+        cols[idx] = cyan.r * 0.4 + white.r * 0.6;
+        cols[idx + 1] = cyan.g * 0.4 + white.g * 0.6;
+        cols[idx + 2] = cyan.b * 0.4 + white.b * 0.6;
+      }
     }
-    return [pos, cols, sz, phs, vls];
+    return [pos, cols, phs, rads, origY];
   }, []);
 
-  // Targets for camera coordinates and scene positions per section
+  // GSAP Camera flight coordinates targeting regions of the galaxy on scroll
   const sectionTargets = useMemo(() => [
-    { // Section 0: Hero (Black Hole)
-      camPos: [0, 1, 6],
-      lookAt: [0, 0, 0],
-      particleScale: 1.0,
-      morphFactor: 0
+    { // Hero: Close-up on the glowing galactic core (the Black Hole region)
+      camPos: [0, 2.5, 5],
+      lookAt: [0, 0, 0]
     },
-    { // Section 1: Internships (Orbit System)
-      camPos: [-2, 0.5, 5],
-      lookAt: [1.2, 0, 0],
-      particleScale: 0.9,
-      morphFactor: 1
+    { // Internships: Move camera sideways overlooking the inner orbiting arm
+      camPos: [-3.8, 1.2, 4],
+      lookAt: [1.0, -0.2, 0.5]
     },
-    { // Section 2: Projects (Nebula)
-      camPos: [2.5, -0.5, 4.5],
-      lookAt: [-1.0, 0, 0],
-      particleScale: 1.4,
-      morphFactor: 2
+    { // Projects: Submerge camera directly inside the purple/magenta dust clouds of the outer arm (Nebula view)
+      camPos: [3.5, -0.8, 4.5],
+      lookAt: [-1.2, 0.4, -0.8]
     },
-    { // Section 3: Skills (Quasar Jet)
-      camPos: [0, 3, 5],
-      lookAt: [0, 0, 0],
-      particleScale: 0.8,
-      morphFactor: 3
+    { // Skills: Align camera vertically directly above the core (Quasar perspective, looking down the Y-axis)
+      camPos: [0, 8, 0.1],
+      lookAt: [0, 0, 0]
     },
-    { // Section 4: Certifications (Pulsar)
-      camPos: [-2, 0.2, 5.5],
-      lookAt: [1.0, 0, 0],
-      particleScale: 1.1,
-      morphFactor: 4
+    { // Certifications: Fly camera into a side view focusing on the pulsing central ring
+      camPos: [-2.5, 0.4, 5.5],
+      lookAt: [0.8, 0, 0.2]
     },
-    { // Section 5: Contact (Deep Starfield)
-      camPos: [0, 0, 8],
-      lookAt: [0, 0, 0],
-      particleScale: 1.5,
-      morphFactor: 5
+    { // Contact: Zoom camera far out, presenting the complete majestic spiral galaxy layout
+      camPos: [0, 9, 14],
+      lookAt: [0, 0, 0]
     }
   ], []);
 
-  // Frame update logic
+  // Frame animation loop
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
     const { camera } = state;
 
-    // 1. Calculate active section and interpolation target
+    // 1. Scroll-driven camera interpolation
     const currentProgress = scrollProgress; // value from 0 to 5
     const baseIdx = Math.min(Math.floor(currentProgress), sectionTargets.length - 2);
     const alpha = currentProgress - baseIdx;
@@ -101,141 +148,58 @@ export default function CelestialBodies({ scrollProgress, activeSection, mousePo
     const tCurrent = sectionTargets[baseIdx];
     const tNext = sectionTargets[baseIdx + 1];
 
-    if (!tCurrent || !tNext) return;
+    if (tCurrent && tNext) {
+      // Lerp camera coordinates
+      const targetCamX = THREE.MathUtils.lerp(tCurrent.camPos[0], tNext.camPos[0], alpha);
+      const targetCamY = THREE.MathUtils.lerp(tCurrent.camPos[1], tNext.camPos[1], alpha);
+      const targetCamZ = THREE.MathUtils.lerp(tCurrent.camPos[2], tNext.camPos[2], alpha);
 
-    // 2. Camera Lerping (Scroll Flight)
-    const targetCamX = THREE.MathUtils.lerp(tCurrent.camPos[0], tNext.camPos[0], alpha);
-    const targetCamY = THREE.MathUtils.lerp(tCurrent.camPos[1], tNext.camPos[1], alpha);
-    const targetCamZ = THREE.MathUtils.lerp(tCurrent.camPos[2], tNext.camPos[2], alpha);
+      const targetLookX = THREE.MathUtils.lerp(tCurrent.lookAt[0], tNext.lookAt[0], alpha);
+      const targetLookY = THREE.MathUtils.lerp(tCurrent.lookAt[1], tNext.lookAt[1], alpha);
+      const targetLookZ = THREE.MathUtils.lerp(tCurrent.lookAt[2], tNext.lookAt[2], alpha);
 
-    const targetLookX = THREE.MathUtils.lerp(tCurrent.lookAt[0], tNext.lookAt[0], alpha);
-    const targetLookY = THREE.MathUtils.lerp(tCurrent.lookAt[1], tNext.lookAt[1], alpha);
-    const targetLookZ = THREE.MathUtils.lerp(tCurrent.lookAt[2], tNext.lookAt[2], alpha);
+      // Smooth camera position interpolation
+      camera.position.set(
+        THREE.MathUtils.lerp(camera.position.x, targetCamX, 0.05),
+        THREE.MathUtils.lerp(camera.position.y, targetCamY, 0.05),
+        THREE.MathUtils.lerp(camera.position.z, targetCamZ, 0.05)
+      );
 
-    // Camera target alignment
-    camera.position.set(
-      THREE.MathUtils.lerp(camera.position.x, targetCamX, 0.08),
-      THREE.MathUtils.lerp(camera.position.y, targetCamY, 0.08),
-      THREE.MathUtils.lerp(camera.position.z, targetCamZ, 0.08)
-    );
+      // Apply look-at smooth targeting
+      const tempLookAt = new THREE.Vector3(targetLookX, targetLookY, targetLookZ);
+      camera.lookAt(tempLookAt);
+    }
 
-    // Apply lookAt smoothly
-    const tempLookAt = new THREE.Vector3(targetLookX, targetLookY, targetLookZ);
-    camera.lookAt(tempLookAt);
+    // 2. Mouse Parallax (adds spatial depth on movement)
+    camera.position.x += mousePos.x * 0.2;
+    camera.position.y += mousePos.y * 0.2;
 
-    // 3. Mouse Parallax (adds 3D depth)
-    camera.position.x += mousePos.x * 0.15;
-    camera.position.y += mousePos.y * 0.15;
-
-    // 4. Animate particles depending on active section profile
+    // 3. Galactic Rotation & Orbiting Dynamics
     if (pointsRef.current) {
       const positionsArray = pointsRef.current.geometry.attributes.position.array;
-      const colorsArray = pointsRef.current.geometry.attributes.color.array;
-
-      const cyan = new THREE.Color("#00d4ff");
-      const purple = new THREE.Color("#7c3aed");
-      const magenta = new THREE.Color("#a855f7");
-      const gold = new THREE.Color("#fbbf24");
-      const white = new THREE.Color("#e2e8f0");
 
       for (let i = 0; i < particleCount; i++) {
         const idx = i * 3;
-        const phase = phases[i];
+        const radius = radii[i];
         
-        // Base coordinate values
-        let x = positionsArray[idx];
-        let y = positionsArray[idx + 1];
-        let z = positionsArray[idx + 2];
+        // Skip static outer starfield points from heavy orbit animation to save cycles
+        if (radius > 12.0) continue;
 
-        // Read active morph profiles (Black Hole -> Orbit -> Nebula -> Quasar -> Pulsar -> Starfield)
-        const activeMorph = THREE.MathUtils.lerp(tCurrent.morphFactor, tNext.morphFactor, alpha);
+        // Differential rotation: stars closer to core revolve faster
+        const orbitSpeed = 0.08 / Math.max(radius, 0.4);
+        const currentAngle = Math.atan2(positionsArray[idx + 2], positionsArray[idx]) + orbitSpeed;
 
-        if (activeMorph < 1.0) {
-          // BLACK HOLE accretion disk orbit
-          const r = Math.sqrt(x*x + z*z);
-          const speed = 0.5 / Math.max(r, 0.1);
-          const nextAngle = Math.atan2(z, x) + speed * 0.02;
-          
-          positionsArray[idx] = Math.cos(nextAngle) * r;
-          positionsArray[idx + 1] = Math.sin(time + phase) * 0.05; // flat disk
-          positionsArray[idx + 2] = Math.sin(nextAngle) * r;
-
-          // Accretion disk colors (warm gold + magenta blend)
-          const targetColor = i % 3 === 0 ? gold : (i % 3 === 1 ? magenta : purple);
-          colorsArray[idx] = THREE.MathUtils.lerp(colorsArray[idx], targetColor.r, 0.05);
-          colorsArray[idx + 1] = THREE.MathUtils.lerp(colorsArray[idx + 1], targetColor.g, 0.05);
-          colorsArray[idx + 2] = THREE.MathUtils.lerp(colorsArray[idx + 2], targetColor.b, 0.05);
-
-        } else if (activeMorph < 2.0) {
-          // ORBIT internships (2-3 orbiting bands)
-          const ringIndex = i % 3;
-          const radius = 1.5 + ringIndex * 1.2;
-          const speed = 0.01 * (3 - ringIndex);
-          const nextAngle = Math.atan2(z, x) + speed;
-
-          positionsArray[idx] = Math.cos(nextAngle) * radius;
-          positionsArray[idx + 1] = THREE.MathUtils.lerp(y, Math.sin(time + phase) * 0.08, 0.05);
-          positionsArray[idx + 2] = Math.sin(nextAngle) * radius;
-
-          // Pure orbit system colors (cyan and white)
-          const targetColor = ringIndex === 0 ? cyan : white;
-          colorsArray[idx] = THREE.MathUtils.lerp(colorsArray[idx], targetColor.r, 0.05);
-          colorsArray[idx + 1] = THREE.MathUtils.lerp(colorsArray[idx + 1], targetColor.g, 0.05);
-          colorsArray[idx + 2] = THREE.MathUtils.lerp(colorsArray[idx + 2], targetColor.b, 0.05);
-
-        } else if (activeMorph < 3.0) {
-          // NEBULA projects (drifting dust cloud)
-          positionsArray[idx] += velocities[idx] * 0.1;
-          positionsArray[idx + 1] += velocities[idx + 1] * 0.1;
-          positionsArray[idx + 2] += velocities[idx + 2] * 0.1;
-
-          // Re-contain particles inside a bounds
-          const dist = Math.sqrt(x*x + y*y + z*z);
-          if (dist > 8.0) {
-            positionsArray[idx] = (Math.random() * 2 - 1) * 3;
-            positionsArray[idx + 1] = (Math.random() * 2 - 1) * 3;
-            positionsArray[idx + 2] = (Math.random() * 2 - 1) * 3;
-          }
-
-          // Nebula colors (magenta, purple, and cyan clouds)
-          const targetColor = i % 3 === 0 ? purple : (i % 3 === 1 ? magenta : cyan);
-          colorsArray[idx] = THREE.MathUtils.lerp(colorsArray[idx], targetColor.r, 0.05);
-          colorsArray[idx + 1] = THREE.MathUtils.lerp(colorsArray[idx + 1], targetColor.g, 0.05);
-          colorsArray[idx + 2] = THREE.MathUtils.lerp(colorsArray[idx + 2], targetColor.b, 0.05);
-
-        } else if (activeMorph < 4.0) {
-          // QUASAR skills (focused vertical particle beams + core explosion)
-          if (i % 3 === 0) {
-            // Vertical jet beam
-            positionsArray[idx] = Math.sin(time * 5 + phase) * 0.15;
-            positionsArray[idx + 1] = ((i % 100) / 100) * 8.0 - 4.0; // dynamic height
-            positionsArray[idx + 2] = Math.cos(time * 5 + phase) * 0.15;
-          } else {
-            // Dense center rotation
-            const radius = 0.4 + Math.random() * 1.5;
-            const nextAngle = Math.atan2(z, x) + 0.04;
-            positionsArray[idx] = Math.cos(nextAngle) * radius;
-            positionsArray[idx + 1] = THREE.MathUtils.lerp(y, (Math.random() * 2 - 1) * 0.4, 0.05);
-            positionsArray[idx + 2] = Math.sin(nextAngle) * radius;
-          }
-
-          // Quasar colors (hot cyan + bright white)
-          const targetColor = i % 2 === 0 ? cyan : white;
-          colorsArray[idx] = THREE.MathUtils.lerp(colorsArray[idx], targetColor.r, 0.05);
-          colorsArray[idx + 1] = THREE.MathUtils.lerp(colorsArray[idx + 1], targetColor.g, 0.05);
-          colorsArray[idx + 2] = THREE.MathUtils.lerp(colorsArray[idx + 2], targetColor.b, 0.05);
-
-        } else {
-          // STARFIELD contact (static wide field)
-          const targetColor = white;
-          colorsArray[idx] = THREE.MathUtils.lerp(colorsArray[idx], targetColor.r, 0.05);
-          colorsArray[idx + 1] = THREE.MathUtils.lerp(colorsArray[idx + 1], targetColor.g, 0.05);
-          colorsArray[idx + 2] = THREE.MathUtils.lerp(colorsArray[idx + 2], targetColor.b, 0.05);
-        }
+        positionsArray[idx] = Math.cos(currentAngle) * radius;
+        // Add subtle wave oscillation on Y-axis (vertical thickness wave)
+        positionsArray[idx + 1] = originalY[i] + Math.sin(time + phases[i]) * (0.05 + radius * 0.015);
+        positionsArray[idx + 2] = Math.sin(currentAngle) * radius;
       }
-
       pointsRef.current.geometry.attributes.position.needsUpdate = true;
-      pointsRef.current.geometry.attributes.color.needsUpdate = true;
+    }
+
+    // Rotate the entire galaxy group slowly
+    if (groupRef.current) {
+      groupRef.current.rotation.y = time * 0.015;
     }
   });
 
@@ -245,7 +209,7 @@ export default function CelestialBodies({ scrollProgress, activeSection, mousePo
         <PointMaterial
           transparent
           vertexColors
-          size={0.06}
+          size={0.065}
           sizeAttenuation={true}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
