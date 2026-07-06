@@ -27,6 +27,7 @@ function VectorGrid({ mousePos, reducedMotion }) {
 
   useFrame((state) => {
     if (reducedMotion) return;
+    if (!nodesRef.current) return;
 
     const time = state.clock.getElapsedTime();
     const nodeGeometry = nodesRef.current.geometry;
