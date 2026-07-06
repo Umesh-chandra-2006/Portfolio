@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import CosmosCanvas from './components/CosmosCanvas';
+import DimensionRouter from './components/DimensionRouter';
+import PortalOverlay from './components/PortalOverlay';
 import ContentOverlay from './components/ContentOverlay';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Helper to detect if WebGL is supported by the browser/hardware
 function detectWebGL() {
   try {
     const canvas = document.createElement('canvas');
@@ -17,14 +17,14 @@ function detectWebGL() {
 }
 
 export default function App() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState(0);
+  const [targetSection, setTargetSection] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [reducedMotion, setReducedMotion] = useState(false);
   const [webGLAvailable, setWebGLAvailable] = useState(true);
   const containerRef = useRef(null);
 
-  // 1. Detect WebGL & prefers-reduced-motion media query
+  // 1. Detect WebGL support and prefers-reduced-motion
   useEffect(() => {
     setWebGLAvailable(detectWebGL());
 
@@ -37,7 +37,7 @@ export default function App() {
     return () => motionQuery.removeEventListener('change', handleMotionChange);
   }, []);
 
-  // 2. Mouse tracking for parallax (only if motion is enabled)
+  // 2. Mouse tracking for visual parallax
   useEffect(() => {
     if (reducedMotion) return;
 
@@ -51,47 +51,57 @@ export default function App() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [reducedMotion]);
 
-  // 3. Scroll Trigger tracking for camera positions
+  // 3. Coordinate ScrollTrigger transitions
   useEffect(() => {
     const sections = gsap.utils.toArray('section');
     const scrollCount = sections.length;
-
-    // In reduced motion, we directly jump to sections without transition delays
-    const scrubTime = reducedMotion ? 0 : 0.5;
 
     const scrollTrigger = ScrollTrigger.create({
       trigger: 'body',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: scrubTime,
+      scrub: reducedMotion ? 0 : 0.5,
       onUpdate: (self) => {
-        const val = self.progress * (scrollCount - 1);
-        setScrollProgress(val);
-        setActiveSection(Math.min(Math.floor(val + 0.5), scrollCount - 1));
+        const progress = self.progress * (scrollCount - 1);
+        const nextSec = Math.min(Math.floor(progress + 0.5), scrollCount - 1);
+        
+        if (nextSec !== targetSection) {
+          setTargetSection(nextSec);
+        }
       }
     });
 
     return () => {
       scrollTrigger.kill();
     };
-  }, [reducedMotion]);
+  }, [targetSection, reducedMotion]);
+
+  // Handle Dimension mounts once transition completes
+  const handleTransitionMidpoint = (nextSec) => {
+    setActiveSection(nextSec);
+  };
 
   return (
     <div ref={containerRef} className={reducedMotion ? 'reduced-motion-active' : ''}>
-      {/* 3D Canvas with WebGL capability fallback */}
+      {/* 3D Cosmos Router Canvas */}
       {webGLAvailable ? (
-        <CosmosCanvas
-          scrollProgress={scrollProgress}
+        <DimensionRouter
           activeSection={activeSection}
           mousePos={reducedMotion ? { x: 0, y: 0 } : mousePos}
           reducedMotion={reducedMotion}
         />
       ) : (
-        // WebGL-unavailable fallback: static starfield background image
         <div className="canvas-container fallback-starfield" aria-hidden="true" />
       )}
 
-      {/* HTML Content Overlay */}
+      {/* Iris Portal Overlay Swapper */}
+      <PortalOverlay
+        targetSection={targetSection}
+        reducedMotion={reducedMotion}
+        onTransitionMidpoint={handleTransitionMidpoint}
+      />
+
+      {/* HTML content sheets */}
       <ContentOverlay />
     </div>
   );
