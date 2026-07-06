@@ -24,6 +24,9 @@ export default function App() {
   const [webGLAvailable, setWebGLAvailable] = useState(true);
   const containerRef = useRef(null);
 
+  // Ref to track current target section inside ScrollTrigger callback to prevent dependencies rebuild loop
+  const targetSectionRef = useRef(0);
+
   // 1. Detect WebGL support and prefers-reduced-motion
   useEffect(() => {
     setWebGLAvailable(detectWebGL());
@@ -65,7 +68,8 @@ export default function App() {
         const progress = self.progress * (scrollCount - 1);
         const nextSec = Math.min(Math.floor(progress + 0.5), scrollCount - 1);
         
-        if (nextSec !== targetSection) {
+        if (nextSec !== targetSectionRef.current) {
+          targetSectionRef.current = nextSec;
           setTargetSection(nextSec);
         }
       }
@@ -74,7 +78,7 @@ export default function App() {
     return () => {
       scrollTrigger.kill();
     };
-  }, [targetSection, reducedMotion]);
+  }, [reducedMotion]); // Re-create scroll trigger ONLY when motion settings change
 
   // Handle Dimension mounts once transition completes
   const handleTransitionMidpoint = (nextSec) => {

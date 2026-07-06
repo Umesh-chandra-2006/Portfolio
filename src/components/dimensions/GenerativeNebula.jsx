@@ -20,10 +20,6 @@ function createGlowTexture() {
 }
 
 const NebulaShaderMaterial = {
-  uniforms: {
-    uTime: { value: 0 },
-    uTexture: { value: null }
-  },
   vertexShader: `
     uniform float uTime;
     attribute vec3 aVelocity;
@@ -60,6 +56,12 @@ function VolumetricClouds({ mousePos, reducedMotion }) {
 
   const count = 18000;
 
+  // Set up local, non-shared uniforms map
+  const uniforms = useMemo(() => ({
+    uTime: { value: 0 },
+    uTexture: { value: glowTex }
+  }), [glowTex]);
+
   const nebulaData = useMemo(() => {
     const pos = new Float32Array(count * 3);
     const cols = new Float32Array(count * 3);
@@ -78,7 +80,7 @@ function VolumetricClouds({ mousePos, reducedMotion }) {
       
       pos[idx] = Math.cos(theta) * radius;
       pos[idx + 1] = Math.sin(theta) * radius * 0.8 + (Math.random() - 0.5) * 1.5;
-      pos[idx + 2] = (Math.random() - 0.5) * 6; // depth corridor
+      pos[idx + 2] = (Math.random() - 0.5) * 6;
 
       const c = i % 3 === 0 ? magenta : (i % 3 === 1 ? purple : cyan);
       cols[idx] = c.r;
@@ -121,8 +123,9 @@ function VolumetricClouds({ mousePos, reducedMotion }) {
       </bufferGeometry>
       <shaderMaterial
         ref={materialRef}
-        args={[NebulaShaderMaterial]}
-        uniforms-uTexture-value={glowTex}
+        vertexShader={NebulaShaderMaterial.vertexShader}
+        fragmentShader={NebulaShaderMaterial.fragmentShader}
+        uniforms={uniforms}
         transparent
         depthWrite={false}
         blending={THREE.AdditiveBlending}
