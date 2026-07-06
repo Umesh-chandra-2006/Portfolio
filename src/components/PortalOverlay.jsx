@@ -1,86 +1,86 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export default function PortalOverlay({ targetSection, reducedMotion, onTransitionMidpoint }) {
-  const [transitioning, setTransitioning] = useState(false);
-  const [visibleSection, setVisibleSection] = useState(targetSection);
-  const currentTarget = useRef(targetSection);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const currentTargetRef = useRef(targetSection);
+  const midTimerRef = useRef(null);
+  const endTimerRef = useRef(null);
 
   useEffect(() => {
-    if (targetSection === currentTarget.current) return;
-    currentTarget.current = targetSection;
+    // Skip if targetSection hasn't actually changed
+    if (targetSection === currentTargetRef.current) return;
+    
+    currentTargetRef.current = targetSection;
 
     if (reducedMotion) {
-      // In reduced motion mode: skip warp/collapsing animations, execute immediate swap
+      // Direct jump for prefers-reduced-motion
       onTransitionMidpoint(targetSection);
-      setVisibleSection(targetSection);
       return;
     }
 
-    // Trigger full portal transition
-    setTransitioning(true);
+    // Cancel any ongoing timers to support instant interruption during rapid scroll
+    if (midTimerRef.current) clearTimeout(midTimerRef.current);
+    if (endTimerRef.current) clearTimeout(endTimerRef.current);
 
-    // Midpoint: Outgoing unmounts, incoming mounts (Exactly 300ms)
-    const midTimer = setTimeout(() => {
+    setIsTransitioning(true);
+
+    // Swap dimensions exactly at the 300ms midpoint of the transition
+    midTimerRef.current = setTimeout(() => {
       onTransitionMidpoint(targetSection);
-      setVisibleSection(targetSection);
     }, 300);
 
-    // End: Transition complete (600ms total)
-    const endTimer = setTimeout(() => {
-      setTransitioning(false);
+    // End transition at 600ms
+    endTimerRef.current = setTimeout(() => {
+      setIsTransitioning(false);
     }, 600);
 
     return () => {
-      clearTimeout(midTimer);
-      clearTimeout(endTimer);
+      if (midTimerRef.current) clearTimeout(midTimerRef.current);
+      if (endTimerRef.current) clearTimeout(endTimerRef.current);
     };
   }, [targetSection, reducedMotion, onTransitionMidpoint]);
 
-  if (reducedMotion) return null;
+  if (reducedMotion || !isTransitioning) return null;
 
   return (
     <div style={{ pointerEvents: 'none', position: 'fixed', inset: 0, zIndex: 100 }}>
-      <AnimatePresence>
-        {transitioning && (
-          <>
-            {/* Chromatic Aberration RGB split flash */}
-            <motion.div
-              className="portal-chromatic-split"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.8, 0] }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'radial-gradient(circle, transparent 30%, rgba(0, 212, 255, 0.15) 100%)',
-                mixBlendMode: 'screen'
-              }}
-            />
+      {/* 
+        Keyed to targetSection to force React to mount a fresh element 
+        and restart the keyframe animations on every section swap
+      */}
+      <motion.div
+        key={targetSection}
+        initial={{ clipPath: 'circle(0% at 50% 50%)' }}
+        animate={{
+          clipPath: [
+            'circle(0% at 50% 50%)', 
+            'circle(150% at 50% 50%)', 
+            'circle(0% at 50% 50%)'
+          ]
+        }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: '#030014',
+          boxShadow: 'inset 0 0 100px rgba(124, 58, 237, 0.4)'
+        }}
+      />
 
-            {/* SVG Iris Clip-Path Portal Curtain */}
-            <motion.div
-              initial={{ clipPath: 'circle(150% at 50% 50%)' }}
-              animate={{ 
-                clipPath: [
-                  'circle(150% at 50% 50%)', 
-                  'circle(0% at 50% 50%)', 
-                  'circle(150% at 50% 50%)'
-                ] 
-              }}
-              exit={{ clipPath: 'circle(150% at 50% 50%)' }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: '#030014',
-                boxShadow: 'inset 0 0 100px rgba(124, 58, 237, 0.4)'
-              }}
-            />
-          </>
-        )}
-      </AnimatePresence>
+      {/* Chromatic aberration RGB split flash */}
+      <motion.div
+        key={`aberration-${targetSection}`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0.8, 0] }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(circle, transparent 30%, rgba(0, 212, 255, 0.15) 100%)',
+          mixBlendMode: 'screen'
+        }}
+      />
     </div>
   );
 }
