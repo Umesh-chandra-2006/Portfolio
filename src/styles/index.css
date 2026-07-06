@@ -70,6 +70,14 @@ body::before {
   pointer-events: none;
 }
 
+.canvas-container.fallback-starfield {
+  background: 
+    radial-gradient(circle at 75% 30%, rgba(139, 127, 255, 0.06) 0%, transparent 60%),
+    radial-gradient(circle at 25% 70%, rgba(232, 197, 71, 0.04) 0%, transparent 55%),
+    #030014;
+}
+
+
 /* ---------- UI Content Overlay ---------- */
 .scroll-container {
   position: relative;

@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import CelestialBodies from './CelestialBodies';
 
-export default function CosmosCanvas({ scrollProgress, activeSection, mousePos }) {
+export default function CosmosCanvas({ scrollProgress, activeSection, mousePos, reducedMotion }) {
   return (
     <div className="canvas-container">
       <Canvas
@@ -23,10 +23,11 @@ export default function CosmosCanvas({ scrollProgress, activeSection, mousePos }
             scrollProgress={scrollProgress}
             activeSection={activeSection}
             mousePos={mousePos}
+            reducedMotion={reducedMotion}
           />
         </Suspense>
 
-        {/* POST-PROCESSING: Bloom makes EVERYTHING glow */}
+        {/* Postprocessing Bloom */}
         <EffectComposer>
           <Bloom
             intensity={1.8}

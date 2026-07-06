@@ -9,14 +9,13 @@ import {
   Globe, 
   Linkedin, 
   Mail, 
-  Twitter, 
+  Github,
   Award, 
   Briefcase, 
   Code, 
   ArrowDown 
 } from 'lucide-react';
 
-// Spring animation config for consistent, premium physics
 const cardSpring = {
   type: "spring",
   stiffness: 100,
@@ -35,13 +34,21 @@ export default function ContentOverlay() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         >
+          <motion.div 
+            className="hero-eyebrow"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.8 }}
+          >
+            Pre-final year (Anurag University) Hyderabad
+          </motion.div>
           <motion.h1 
             className="hero-name"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 1 }}
           >
-            Umesh
+            Umesh Chandra
           </motion.h1>
           <motion.p 
             className="hero-tagline"
@@ -49,7 +56,7 @@ export default function ContentOverlay() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
-            AI Engineer &amp; Systems Thinker
+            Building things that actually <span className="highlight">work</span>
           </motion.p>
           <motion.p 
             className="hero-desc"
@@ -57,9 +64,7 @@ export default function ContentOverlay() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.8 }}
           >
-            Building intelligent systems at the intersection of{" "}
-            <span className="highlight">deep learning</span> and{" "}
-            <span className="highlight">software engineering</span>.
+            AI Engineer Intern at IISPPR. I build and ship production-grade full-stack products that scale. Selected in top 1.4% of 40,000+ applicants.
           </motion.p>
           <motion.a 
             href="#internships" 
@@ -81,28 +86,28 @@ export default function ContentOverlay() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h2 className="section-title">Internships</h2>
+          <h2 className="section-title">Experience</h2>
           <p className="section-subtitle">orbiting the industry</p>
 
           <div className="timeline">
             {[
               {
-                role: "Machine Learning Intern",
-                company: "Google",
-                time: "Jun 2025 – Aug 2025",
-                desc: "Developed transformer-based models for natural language understanding, improving inference latency by 40% through quantization and distillation techniques."
+                role: "AI Engineer Intern",
+                company: "IISPPR",
+                time: "May 2026 – Aug 2026 (Ongoing)",
+                desc: "Building LLM-orchestrated automation pipelines in n8n. Developed a 3-agent academic-text generation pipeline (rewriting, verifier, and refinement agents) that preserves semantic meaning."
               },
               {
-                role: "AI Research Intern",
-                company: "DeepMind",
-                time: "Jan 2025 – May 2025",
-                desc: "Contributed to reinforcement learning research on multi-agent coordination, co-authoring a paper accepted at ICML 2025."
+                role: "Software Engineer Intern",
+                company: "Slayyers",
+                time: "Jul 2025 – Dec 2025",
+                desc: "Architected and shipped RESTful microservices for a 60-minute delivery platform (checkout flow, order tracking, and routing). Implemented Redis caching that cut API latency by over 40%."
               },
               {
-                role: "Data Science Intern",
-                company: "Microsoft",
-                time: "May 2024 – Aug 2024",
-                desc: "Built end-to-end ML pipelines for predictive analytics on Azure, processing 50M+ daily events with sub-second latency."
+                role: "Software Engineer Co-op Intern",
+                company: "AlgoUniversity (YC-backed)",
+                time: "May 2025 – Jul 2025",
+                desc: "Selected from 40,000+ applicants (top 1.4%). Solo-built and shipped a sandboxed C++/Python online judge execution engine with hard TLE/MLE/CE detection serving 150+ students."
               }
             ].map((job, idx) => (
               <motion.div 
@@ -116,7 +121,7 @@ export default function ContentOverlay() {
                 <span className="timeline-dot"></span>
                 <div className="timeline-content">
                   <h3 className="card-title">
-                    {job.role} — <span className="highlight">{job.company}</span>
+                    {job.role} at <span className="highlight">{job.company}</span>
                   </h3>
                   <p className="card-meta">{job.time}</p>
                   <p className="card-desc">{job.desc}</p>
@@ -142,24 +147,18 @@ export default function ContentOverlay() {
           <div className="grid-2">
             {[
               {
-                title: "NeuralForge",
-                tags: ["Python", "PyTorch", "CUDA"],
-                desc: "A custom deep learning framework built from scratch, supporting automatic differentiation and GPU kernels."
+                title: "PlaceIQ",
+                tags: ["React", "Node.js", "FastAPI", "MongoDB", "OpenRouter API", "Docker"],
+                desc: "Multi-tenant placement platform with 4-tier hierarchical RBAC across 10 indexed MongoDB schemas and 65 REST endpoints. Deployed with a hybrid ATS resume-scoring pipeline (combining keyword matching with OpenRouter AI review), FastAPI scraper, Twilio alerts, and Docker CI/CD.",
+                link: "https://place-iq-six.vercel.app",
+                github: "https://github.com/Umesh-chandra-2006/PlaceIQ"
               },
               {
-                title: "Sentinel AI",
-                tags: ["TensorFlow", "Vision", "Edge"],
-                desc: "Real-time anomaly detection system for security cameras using lightweight CNNs optimized for edge deployment."
-              },
-              {
-                title: "LinguaFlow",
-                tags: ["NLP", "Transformers", "Rust"],
-                desc: "High-performance NLP pipeline engine written in Rust with Python bindings, achieving 10x throughput increases."
-              },
-              {
-                title: "Cosmos Sim",
-                tags: ["WebGL", "Physics", "Three.js"],
-                desc: "N-body gravitational simulation running in the browser with Barnes-Hut optimization, supporting 100K+ particles."
+                title: "Code Slayer",
+                tags: ["AWS EC2/ECR", "React", "Node.js", "Docker", "MongoDB", "Gemini API"],
+                desc: "Full-stack online judge that served 150+ users with 500+ submissions in its first month. Features a sandboxed C++/Python execution engine with hard limit detection (1,000ms timeout, 256MB RAM), a 3-scenario Gemini AI code reviewer, and JWT + RBAC authorization.",
+                link: "https://codeslayer.me",
+                github: "https://github.com/Umesh-chandra-2006/Code_Slayer"
               }
             ].map((project, idx) => (
               <motion.div 
@@ -178,7 +177,17 @@ export default function ContentOverlay() {
                     <span className="tag" key={tag}>{tag}</span>
                   ))}
                 </div>
-                <p className="card-desc">{project.desc}</p>
+                <p className="card-desc" style={{ marginBottom: "1.5rem" }}>{project.desc}</p>
+                <div className="project-links">
+                  {project.link && (
+                    <a href={project.link} target="_blank" rel="noopener noreferrer">
+                      Live <Globe size={12} style={{ marginLeft: "2px" }} />
+                    </a>
+                  )}
+                  <a href={project.github} target="_blank" rel="noopener noreferrer">
+                    GitHub <Github size={12} style={{ marginLeft: "2px" }} />
+                  </a>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -202,34 +211,48 @@ export default function ContentOverlay() {
               {
                 cat: "Languages",
                 items: [
+                  { name: "C++", icon: <Code size={14} /> },
                   { name: "Python", icon: <Code size={14} /> },
-                  { name: "Rust", icon: <Terminal size={14} /> },
-                  { name: "C++", icon: <Cpu size={14} /> },
                   { name: "JavaScript", icon: <Globe size={14} /> },
-                  { name: "TypeScript", icon: <Globe size={14} /> },
-                  { name: "Go", icon: <Layers size={14} /> }
+                  { name: "Java", icon: <Cpu size={14} /> },
+                  { name: "C", icon: <Terminal size={14} /> }
                 ]
               },
               {
-                cat: "ML / AI",
+                cat: "AI / Agents",
                 items: [
-                  { name: "PyTorch", icon: <Cpu size={14} /> },
-                  { name: "TensorFlow", icon: <Cpu size={14} /> },
-                  { name: "JAX", icon: <Activity size={14} /> },
-                  { name: "Hugging Face", icon: <Layers size={14} /> },
-                  { name: "ONNX", icon: <Layers size={14} /> },
-                  { name: "LangChain", icon: <Layers size={14} /> }
+                  { name: "LangGraph", icon: <Cpu size={14} /> },
+                  { name: "n8n", icon: <Layers size={14} /> },
+                  { name: "Multi-agent Pipelines", icon: <Activity size={14} /> },
+                  { name: "Gemini API", icon: <Cpu size={14} /> },
+                  { name: "Claude API", icon: <Cpu size={14} /> },
+                  { name: "OpenRouter API", icon: <Globe size={14} /> }
                 ]
               },
               {
-                cat: "Infrastructure",
+                cat: "Backend & Infrastructure",
                 items: [
+                  { name: "Node.js", icon: <Terminal size={14} /> },
+                  { name: "Express.js", icon: <Terminal size={14} /> },
+                  { name: "FastAPI", icon: <Cpu size={14} /> },
+                  { name: "REST APIs", icon: <Layers size={14} /> },
                   { name: "Docker", icon: <Shield size={14} /> },
-                  { name: "Kubernetes", icon: <Layers size={14} /> },
-                  { name: "AWS", icon: <Globe size={14} /> },
-                  { name: "GCP", icon: <Globe size={14} /> },
-                  { name: "Azure", icon: <Globe size={14} /> },
-                  { name: "Terraform", icon: <Terminal size={14} /> }
+                  { name: "AWS (EC2, ECR, S3)", icon: <Globe size={14} /> },
+                  { name: "Kubernetes (GKE)", icon: <Layers size={14} /> },
+                  { name: "MongoDB", icon: <Layers size={14} /> },
+                  { name: "Redis", icon: <Activity size={14} /> },
+                  { name: "PostgreSQL", icon: <Layers size={14} /> }
+                ]
+              },
+              {
+                cat: "Frontend & Integrations",
+                items: [
+                  { name: "React", icon: <Globe size={14} /> },
+                  { name: "Tailwind CSS", icon: <Layers size={14} /> },
+                  { name: "React Native", icon: <Globe size={14} /> },
+                  { name: "Zustand", icon: <Activity size={14} /> },
+                  { name: "Three.js", icon: <Globe size={14} /> },
+                  { name: "FFmpeg", icon: <Terminal size={14} /> }
                 ]
               }
             ].map((group, gIdx) => (
@@ -269,14 +292,31 @@ export default function ContentOverlay() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h2 className="section-title">Certifications</h2>
+          <h2 className="section-title">Credentials</h2>
           <p className="section-subtitle">verified signals</p>
 
-          <div className="grid-3">
+          <div className="grid-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
             {[
-              { title: "AWS Solutions Architect", issuer: "Professional", year: "2025" },
-              { title: "TensorFlow Developer", issuer: "Google", year: "2024" },
-              { title: "Deep Learning Spec", issuer: "deeplearning.ai", year: "2024" }
+              { 
+                title: "AlgoUniversity Accelerator", 
+                issuer: "Accelerator: Top 1.4% of 40,000", 
+                detail: "Focused on production DSA and systems curriculum with mentorship from engineers at Google and Apple." 
+              },
+              { 
+                title: "Google Agentathon", 
+                issuer: "Guinness World Record Event", 
+                detail: "Developed MarketPulse-X (a 6-agent supply chain intelligence pipeline on Kubernetes) with 15k+ participants." 
+              },
+              { 
+                title: "Google Cloud Skill Badges", 
+                issuer: "25 Skill Badges", 
+                detail: "Verified badges including Gemini Application Development, Multimodal RAG, and MLOps for Generative AI." 
+              },
+              { 
+                title: "MERN Stack Training", 
+                issuer: "Suntek (Institution-wide)", 
+                detail: "Selected among 150 students across all branches institution-wide for an industry-led full-stack development program." 
+              }
             ].map((cert, idx) => (
               <motion.div 
                 className="card gold-pulse" 
@@ -290,7 +330,8 @@ export default function ContentOverlay() {
               >
                 <Award size={20} className="highlight" style={{ marginBottom: "1rem" }} />
                 <h3 className="card-title" style={{ fontSize: "1.05rem" }}>{cert.title}</h3>
-                <p className="card-meta">{cert.issuer} · {cert.year}</p>
+                <p className="card-meta" style={{ color: "var(--color-gold)", fontSize: "0.75rem" }}>{cert.issuer}</p>
+                <p className="card-desc" style={{ fontSize: "0.85rem", marginTop: "0.5rem" }}>{cert.detail}</p>
               </motion.div>
             ))}
           </div>
@@ -311,15 +352,16 @@ export default function ContentOverlay() {
 
           <div className="contact-grid">
             {[
-              { label: "GitHub", href: "#", icon: <Code /> },
-              { label: "LinkedIn", href: "#", icon: <Linkedin /> },
-              { label: "Email", href: "mailto:umesh@example.com", icon: <Mail /> },
-              { label: "Twitter / X", href: "#", icon: <Twitter /> }
+              { label: "GitHub", href: "https://github.com/Umesh-chandra-2006", icon: <Github /> },
+              { label: "LinkedIn", href: "https://www.linkedin.com/in/tirumani-umesh-chandra-b3b5b8314/", icon: <Linkedin /> },
+              { label: "Email", href: "mailto:thirumaniumeshchandra2006@gmail.com", icon: <Mail /> }
             ].map((link, idx) => (
               <motion.a 
                 href={link.href} 
                 className="contact-button" 
                 key={idx}
+                target={link.href.startsWith("mailto:") ? "_self" : "_blank"}
+                rel="noopener noreferrer"
                 whileHover={{ 
                   y: -3, 
                   borderColor: "rgba(255, 255, 255, 0.2)",
@@ -335,7 +377,7 @@ export default function ContentOverlay() {
           </div>
 
           <p className="footer-text">
-            © 2026 Umesh. Crafted with React, Framer Motion &amp; Three.js.
+            © 2026 Umesh Chandra. Hyderabad, India · Open to opportunities.
           </p>
         </motion.div>
       </section>
