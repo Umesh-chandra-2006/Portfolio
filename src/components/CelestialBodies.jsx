@@ -3,144 +3,252 @@ import { useFrame } from '@react-three/fiber';
 import { Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
+// ─── HELPER FOR CREATING CIRCULAR TEXTURES ─────────────────────────────────────
+// Generates a soft circular radial gradient for glowing particles
+function createGlowTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  grad.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
+  grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
+  grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 64, 64);
+  const texture = new THREE.CanvasTexture(canvas);
+  return texture;
+}
+
 export default function CelestialBodies({ scrollProgress, activeSection, mousePos }) {
-  const pointsRef = useRef();
   const groupRef = useRef();
+  const blackHoleDiskRef = useRef();
+  const orbitRingsRef = useRef();
+  const nebulaRef = useRef();
+  const quasarRef = useRef();
+  const pulsarRef = useRef();
+  const pulsarMeshRef = useRef();
 
-  const particleCount = 35000;
+  const glowTex = useMemo(() => createGlowTexture(), []);
 
-  // Generate a double-arm spiral galaxy layout
-  const [positions, colors, phases, radii, originalY] = useMemo(() => {
-    const pos = new Float32Array(particleCount * 3);
-    const cols = new Float32Array(particleCount * 3);
-    const phs = new Float32Array(particleCount);
-    const rads = new Float32Array(particleCount);
-    const origY = new Float32Array(particleCount);
+  // ─── 3D SCENE COORDINATES MAP ────────────────────────────────────────────────
+  const COORDS = {
+    blackHole: [0, 0, 0],
+    orbits: [-15, -2, -15],
+    nebula: [20, -5, -30],
+    quasar: [-30, 8, -45],
+    pulsar: [25, 5, -60]
+  };
 
-    const cyan = new THREE.Color("#00d4ff");
-    const purple = new THREE.Color("#7c3aed");
-    const magenta = new THREE.Color("#a855f7");
-    const gold = new THREE.Color("#fbbf24");
-    const white = new THREE.Color("#f8fafc");
-
-    for (let i = 0; i < particleCount; i++) {
-      const idx = i * 3;
-      phs[i] = Math.random() * Math.PI * 2;
-
-      // 1. Distribute particles into Bulge, Arms, or Halo Haze
-      if (i < 8000) {
-        // --- CENTRAL BULGE (Dense sphere at the center) ---
-        const radius = Math.pow(Math.random(), 2) * 1.5; // Dense core falloff
-        const u = Math.random();
-        const v = Math.random();
-        const theta = u * 2.0 * Math.PI;
-        const phi = Math.acos(2.0 * v - 1.0);
-
-        pos[idx] = radius * Math.sin(phi) * Math.cos(theta);
-        pos[idx + 1] = radius * Math.sin(phi) * Math.sin(theta) * 0.7; // slightly flattened
-        pos[idx + 2] = radius * Math.cos(phi);
-
-        rads[i] = radius;
-        origY[i] = pos[idx + 1];
-
-        // Central bulge colors: hot white core blending to warm gold
-        const targetColor = Math.random() > 0.4 ? white : gold;
-        cols[idx] = targetColor.r;
-        cols[idx + 1] = targetColor.g;
-        cols[idx + 2] = targetColor.b;
-
-      } else if (i < 30000) {
-        // --- SPIRAL ARMS (Double logarithmic spiral) ---
-        const armIndex = i % 2; // 2 distinct arms
-        const angleOffset = armIndex * Math.PI; // Offset second arm by 180 degrees
-        
-        // Logarithmic spiral math: theta determines radius
-        const theta = Math.random() * 8.0; // curl intensity
-        const radius = 1.0 + theta * 1.2; // radius increases with curl angle
-        
-        // Add random scatter to make arms volumetric
-        const scatterX = (Math.random() - 0.5) * (0.8 + theta * 0.15);
-        const scatterY = (Math.random() - 0.5) * (0.3 + theta * 0.05);
-        const scatterZ = (Math.random() - 0.5) * (0.8 + theta * 0.15);
-
-        const x = Math.cos(theta + angleOffset) * radius + scatterX;
-        const z = Math.sin(theta + angleOffset) * radius + scatterZ;
-        const y = scatterY;
-
-        pos[idx] = x;
-        pos[idx + 1] = y;
-        pos[idx + 2] = z;
-
-        rads[i] = Math.sqrt(x*x + z*z);
-        origY[i] = y;
-
-        // Spiral arm colors: cyan inner arm, purple/magenta outer arm
-        let targetColor;
-        if (radius < 4.0) {
-          targetColor = Math.random() > 0.5 ? cyan : purple;
-        } else {
-          targetColor = Math.random() > 0.4 ? purple : magenta;
-        }
-
-        cols[idx] = targetColor.r;
-        cols[idx + 1] = targetColor.g;
-        cols[idx + 2] = targetColor.b;
-
-      } else {
-        // --- STAR HALO HAZE (Wide sparse background stars) ---
-        const radius = 4.0 + Math.random() * 15.0;
-        const angle = Math.random() * Math.PI * 2;
-        
-        pos[idx] = Math.cos(angle) * radius;
-        pos[idx + 1] = (Math.random() - 0.5) * 3.0; // thin disk
-        pos[idx + 2] = Math.sin(angle) * radius;
-
-        rads[i] = radius;
-        origY[i] = pos[idx + 1];
-
-        // Background stars: cool blue-white
-        cols[idx] = cyan.r * 0.4 + white.r * 0.6;
-        cols[idx + 1] = cyan.g * 0.4 + white.g * 0.6;
-        cols[idx + 2] = cyan.b * 0.4 + white.b * 0.6;
-      }
-    }
-    return [pos, cols, phs, rads, origY];
-  }, []);
-
-  // GSAP Camera flight coordinates targeting regions of the galaxy on scroll
+  // ─── CAMERA TOUR FLIGHT TARGETS ──────────────────────────────────────────────
   const sectionTargets = useMemo(() => [
-    { // Hero: Close-up on the glowing galactic core (the Black Hole region)
-      camPos: [0, 2.5, 5],
-      lookAt: [0, 0, 0]
+    { // Hero: Close-up on the black hole
+      camPos: [0, 1.5, 6.5],
+      lookAt: COORDS.blackHole
     },
-    { // Internships: Move camera sideways overlooking the inner orbiting arm
-      camPos: [-3.8, 1.2, 4],
-      lookAt: [1.0, -0.2, 0.5]
+    { // Internships: Orbiting System
+      camPos: [-15, 0.5, -9.5],
+      lookAt: COORDS.orbits
     },
-    { // Projects: Submerge camera directly inside the purple/magenta dust clouds of the outer arm (Nebula view)
-      camPos: [3.5, -0.8, 4.5],
-      lookAt: [-1.2, 0.4, -0.8]
+    { // Projects: Submerged inside the Nebula
+      camPos: [15, -3.5, -24.5],
+      lookAt: COORDS.nebula
     },
-    { // Skills: Align camera vertically directly above the core (Quasar perspective, looking down the Y-axis)
-      camPos: [0, 8, 0.1],
-      lookAt: [0, 0, 0]
+    { // Skills: Vertical top-down look at the Quasar vertical jet
+      camPos: [-30, 14, -44.9],
+      lookAt: COORDS.quasar
     },
-    { // Certifications: Fly camera into a side view focusing on the pulsing central ring
-      camPos: [-2.5, 0.4, 5.5],
-      lookAt: [0.8, 0, 0.2]
+    { // Certifications: Looking directly at the pulsing Pulsar core
+      camPos: [18, 5, -53.5],
+      lookAt: COORDS.pulsar
     },
-    { // Contact: Zoom camera far out, presenting the complete majestic spiral galaxy layout
-      camPos: [0, 9, 14],
-      lookAt: [0, 0, 0]
+    { // Contact: Zoomed out, overview of the whole universe
+      camPos: [0, 35, -25],
+      lookAt: [0, 0, -30]
     }
   ], []);
 
-  // Frame animation loop
+  // ─── 1. GLOBAL BACKGROUND STARFIELD (10,000 particles) ────────────────────────
+  const starfield = useMemo(() => {
+    const count = 10000;
+    const pos = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      // Scatter in a massive hollow sphere
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const radius = 100 + Math.random() * 50;
+
+      pos[idx] = radius * Math.sin(phi) * Math.cos(theta);
+      pos[idx + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      pos[idx + 2] = radius * Math.cos(phi);
+    }
+    return pos;
+  }, []);
+
+  // ─── 2. BLACK HOLE ACCRETION DISK (8,000 particles) ──────────────────────────
+  const blackHoleDisk = useMemo(() => {
+    const count = 8000;
+    const pos = new Float32Array(count * 3);
+    const cols = new Float32Array(count * 3);
+    const gold = new THREE.Color("#fbbf24");
+    const magenta = new THREE.Color("#a855f7");
+
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 1.0 + Math.pow(Math.random(), 2) * 3.5; // Dense inner disk
+
+      pos[idx] = Math.cos(angle) * radius;
+      pos[idx + 1] = (Math.random() - 0.5) * 0.1; // Flat disk
+      pos[idx + 2] = Math.sin(angle) * radius;
+
+      // Color gradient: warm gold near the horizon, magenta/violet at the edge
+      const colorMix = radius < 2.0 ? gold : magenta;
+      cols[idx] = colorMix.r;
+      cols[idx + 1] = colorMix.g;
+      cols[idx + 2] = colorMix.b;
+    }
+    return { pos, cols };
+  }, []);
+
+  // ─── 3. ORBITING PLANETARY SYSTEM (4,000 particles) ──────────────────────────
+  const orbitRings = useMemo(() => {
+    const count = 4000;
+    const pos = new Float32Array(count * 3);
+    const cols = new Float32Array(count * 3);
+    const cyan = new THREE.Color("#00d4ff");
+    const white = new THREE.Color("#f8fafc");
+
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      const ringIndex = i % 3; // 3 concentric rings
+      const radius = 1.2 + ringIndex * 0.9;
+      const angle = Math.random() * Math.PI * 2;
+
+      pos[idx] = COORDS.orbits[0] + Math.cos(angle) * radius;
+      pos[idx + 1] = COORDS.orbits[1] + (Math.random() - 0.5) * 0.05;
+      pos[idx + 2] = COORDS.orbits[2] + Math.sin(angle) * radius;
+
+      const colorMix = ringIndex === 0 ? cyan : white;
+      cols[idx] = colorMix.r;
+      cols[idx + 1] = colorMix.g;
+      cols[idx + 2] = colorMix.b;
+    }
+    return { pos, cols };
+  }, []);
+
+  // ─── 4. VOLUMETRIC NEBULA (5,000 particles) ──────────────────────────────────
+  const nebula = useMemo(() => {
+    const count = 5000;
+    const pos = new Float32Array(count * 3);
+    const cols = new Float32Array(count * 3);
+    const velocities = new Float32Array(count * 3);
+    
+    const purple = new THREE.Color("#7c3aed");
+    const magenta = new THREE.Color("#a855f7");
+    const cyan = new THREE.Color("#00d4ff");
+
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      // Distribute in overlapping spherical clusters to build thickness
+      const clusterOffset = i % 3 === 0 ? -1.5 : (i % 3 === 1 ? 0 : 1.5);
+      
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const radius = Math.random() * 3.5;
+
+      pos[idx] = COORDS.nebula[0] + radius * Math.sin(phi) * Math.cos(theta) + clusterOffset;
+      pos[idx + 1] = COORDS.nebula[1] + radius * Math.sin(phi) * Math.sin(theta) * 0.8;
+      pos[idx + 2] = COORDS.nebula[2] + radius * Math.cos(phi);
+
+      const colorMix = i % 3 === 0 ? purple : (i % 3 === 1 ? magenta : cyan);
+      cols[idx] = colorMix.r;
+      cols[idx + 1] = colorMix.g;
+      cols[idx + 2] = colorMix.b;
+
+      // Drift velocities
+      velocities[idx] = (Math.random() - 0.5) * 0.05;
+      velocities[idx + 1] = (Math.random() - 0.5) * 0.05;
+      velocities[idx + 2] = (Math.random() - 0.5) * 0.05;
+    }
+    return { pos, cols, velocities };
+  }, []);
+
+  // ─── 5. QUASAR JETS (5,000 particles) ────────────────────────────────────────
+  const quasar = useMemo(() => {
+    const count = 5000;
+    const pos = new Float32Array(count * 3);
+    const cols = new Float32Array(count * 3);
+    const cyan = new THREE.Color("#00d4ff");
+    const white = new THREE.Color("#f8fafc");
+
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      
+      if (i < 2000) {
+        // Accretion disk around quasar core
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.5 + Math.random() * 2.0;
+        pos[idx] = COORDS.quasar[0] + Math.cos(angle) * radius;
+        pos[idx + 1] = COORDS.quasar[1] + (Math.random() - 0.5) * 0.08;
+        pos[idx + 2] = COORDS.quasar[2] + Math.sin(angle) * radius;
+
+        cols[idx] = cyan.r;
+        cols[idx + 1] = cyan.g;
+        cols[idx + 2] = cyan.b;
+      } else {
+        // High-velocity vertical polar jets (shooting along Y-axis)
+        const direction = i % 2 === 0 ? 1 : -1;
+        const height = Math.random() * 6.0;
+        const radius = 0.02 + height * 0.05; // Jet spreads out slightly
+        const angle = Math.random() * Math.PI * 2;
+
+        pos[idx] = COORDS.quasar[0] + Math.cos(angle) * radius;
+        pos[idx + 1] = COORDS.quasar[1] + height * direction;
+        pos[idx + 2] = COORDS.quasar[2] + Math.sin(angle) * radius;
+
+        cols[idx] = white.r;
+        cols[idx + 1] = white.g;
+        cols[idx + 2] = white.b;
+      }
+    }
+    return { pos, cols };
+  }, []);
+
+  // ─── 6. PULSAR CONCENTRIC HALOS (3,000 particles) ────────────────────────────
+  const pulsar = useMemo(() => {
+    const count = 3000;
+    const pos = new Float32Array(count * 3);
+    const cols = new Float32Array(count * 3);
+    const gold = new THREE.Color("#fbbf24");
+    const white = new THREE.Color("#f8fafc");
+
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      const angle = Math.random() * Math.PI * 2;
+      const ringIndex = i % 4; // 4 magnetic field layers
+      const radius = 0.8 + ringIndex * 0.6;
+
+      pos[idx] = COORDS.pulsar[0] + Math.cos(angle) * radius;
+      pos[idx + 1] = COORDS.pulsar[1] + (Math.random() - 0.5) * 0.1;
+      pos[idx + 2] = COORDS.pulsar[2] + Math.sin(angle) * radius;
+
+      const colorMix = ringIndex % 2 === 0 ? gold : white;
+      cols[idx] = colorMix.r;
+      cols[idx + 1] = colorMix.g;
+      cols[idx + 2] = colorMix.b;
+    }
+    return { pos, cols };
+  }, []);
+
+  // ─── CORE RENDERING ANIMATION LOOP ──────────────────────────────────────────
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
     const { camera } = state;
 
-    // 1. Scroll-driven camera interpolation
+    // 1. Camera scroll-routing coordinates calculations
     const currentProgress = scrollProgress; // value from 0 to 5
     const baseIdx = Math.min(Math.floor(currentProgress), sectionTargets.length - 2);
     const alpha = currentProgress - baseIdx;
@@ -149,7 +257,6 @@ export default function CelestialBodies({ scrollProgress, activeSection, mousePo
     const tNext = sectionTargets[baseIdx + 1];
 
     if (tCurrent && tNext) {
-      // Lerp camera coordinates
       const targetCamX = THREE.MathUtils.lerp(tCurrent.camPos[0], tNext.camPos[0], alpha);
       const targetCamY = THREE.MathUtils.lerp(tCurrent.camPos[1], tNext.camPos[1], alpha);
       const targetCamZ = THREE.MathUtils.lerp(tCurrent.camPos[2], tNext.camPos[2], alpha);
@@ -158,63 +265,263 @@ export default function CelestialBodies({ scrollProgress, activeSection, mousePo
       const targetLookY = THREE.MathUtils.lerp(tCurrent.lookAt[1], tNext.lookAt[1], alpha);
       const targetLookZ = THREE.MathUtils.lerp(tCurrent.lookAt[2], tNext.lookAt[2], alpha);
 
-      // Smooth camera position interpolation
+      // Smooth camera interpolation
       camera.position.set(
         THREE.MathUtils.lerp(camera.position.x, targetCamX, 0.05),
         THREE.MathUtils.lerp(camera.position.y, targetCamY, 0.05),
         THREE.MathUtils.lerp(camera.position.z, targetCamZ, 0.05)
       );
 
-      // Apply look-at smooth targeting
+      // LookAt Lerp target
       const tempLookAt = new THREE.Vector3(targetLookX, targetLookY, targetLookZ);
       camera.lookAt(tempLookAt);
     }
 
-    // 2. Mouse Parallax (adds spatial depth on movement)
-    camera.position.x += mousePos.x * 0.2;
-    camera.position.y += mousePos.y * 0.2;
+    // 2. Mouse Parallax (Tilts perspective dynamically)
+    camera.position.x += mousePos.x * 0.15;
+    camera.position.y += mousePos.y * 0.15;
 
-    // 3. Galactic Rotation & Orbiting Dynamics
-    if (pointsRef.current) {
-      const positionsArray = pointsRef.current.geometry.attributes.position.array;
-
-      for (let i = 0; i < particleCount; i++) {
+    // 3. Accretion Disk Rotation (Black Hole)
+    if (blackHoleDiskRef.current) {
+      const pos = blackHoleDiskRef.current.geometry.attributes.position.array;
+      for (let i = 0; i < blackHoleDisk.pos.length / 3; i++) {
         const idx = i * 3;
-        const radius = radii[i];
-        
-        // Skip static outer starfield points from heavy orbit animation to save cycles
-        if (radius > 12.0) continue;
+        const x = pos[idx];
+        const z = pos[idx + 2];
+        const radius = Math.sqrt(x*x + z*z);
+        const orbitSpeed = 0.02 / Math.max(radius, 0.5);
+        const angle = Math.atan2(z, x) + orbitSpeed;
 
-        // Differential rotation: stars closer to core revolve faster
-        const orbitSpeed = 0.08 / Math.max(radius, 0.4);
-        const currentAngle = Math.atan2(positionsArray[idx + 2], positionsArray[idx]) + orbitSpeed;
-
-        positionsArray[idx] = Math.cos(currentAngle) * radius;
-        // Add subtle wave oscillation on Y-axis (vertical thickness wave)
-        positionsArray[idx + 1] = originalY[i] + Math.sin(time + phases[i]) * (0.05 + radius * 0.015);
-        positionsArray[idx + 2] = Math.sin(currentAngle) * radius;
+        pos[idx] = Math.cos(angle) * radius;
+        pos[idx + 2] = Math.sin(angle) * radius;
       }
-      pointsRef.current.geometry.attributes.position.needsUpdate = true;
+      blackHoleDiskRef.current.geometry.attributes.position.needsUpdate = true;
     }
 
-    // Rotate the entire galaxy group slowly
-    if (groupRef.current) {
-      groupRef.current.rotation.y = time * 0.015;
+    // 4. Concentric orbits rotation (Internships)
+    if (orbitRingsRef.current) {
+      const pos = orbitRingsRef.current.geometry.attributes.position.array;
+      for (let i = 0; i < orbitRings.pos.length / 3; i++) {
+        const idx = i * 3;
+        const ringIdx = i % 3;
+        
+        const dx = pos[idx] - COORDS.orbits[0];
+        const dz = pos[idx + 2] - COORDS.orbits[2];
+        const radius = Math.sqrt(dx*dx + dz*dz);
+        const orbitSpeed = 0.005 * (3 - ringIdx);
+        const angle = Math.atan2(dz, dx) + orbitSpeed;
+
+        pos[idx] = COORDS.orbits[0] + Math.cos(angle) * radius;
+        pos[idx + 2] = COORDS.orbits[2] + Math.sin(angle) * radius;
+      }
+      orbitRingsRef.current.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // 5. Nebula drift animation (Projects)
+    if (nebulaRef.current) {
+      const pos = nebulaRef.current.geometry.attributes.position.array;
+      const vels = nebula.velocities;
+      for (let i = 0; i < nebula.pos.length / 3; i++) {
+        const idx = i * 3;
+        pos[idx] += vels[idx] * 0.1;
+        pos[idx + 1] += vels[idx + 1] * 0.1;
+        pos[idx + 2] += vels[idx + 2] * 0.1;
+
+        // Bounce drift borders
+        const dx = pos[idx] - COORDS.nebula[0];
+        const dy = pos[idx + 1] - COORDS.nebula[1];
+        const dz = pos[idx + 2] - COORDS.nebula[2];
+        const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+        
+        if (dist > 4.5) {
+          vels[idx] *= -1;
+          vels[idx + 1] *= -1;
+          vels[idx + 2] *= -1;
+        }
+      }
+      nebulaRef.current.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // 6. Quasar vertical jet streams (Skills)
+    if (quasarRef.current) {
+      const pos = quasarRef.current.geometry.attributes.position.array;
+      for (let i = 0; i < quasar.pos.length / 3; i++) {
+        const idx = i * 3;
+        
+        if (i >= 2000) {
+          // polar jet acceleration upward or downward along Y
+          const direction = i % 2 === 0 ? 1 : -1;
+          pos[idx + 1] += 0.05 * direction;
+
+          // Loop jet particles back to core
+          const dy = pos[idx + 1] - COORDS.quasar[1];
+          if (Math.abs(dy) > 7.0) {
+            pos[idx] = COORDS.quasar[0] + (Math.random() - 0.5) * 0.05;
+            pos[idx + 1] = COORDS.quasar[1];
+            pos[idx + 2] = COORDS.quasar[2] + (Math.random() - 0.5) * 0.05;
+          }
+        } else {
+          // Accretion disk rotation
+          const dx = pos[idx] - COORDS.quasar[0];
+          const dz = pos[idx + 2] - COORDS.quasar[2];
+          const radius = Math.sqrt(dx*dx + dz*dz);
+          const angle = Math.atan2(dz, dx) + 0.02;
+          pos[idx] = COORDS.quasar[0] + Math.cos(angle) * radius;
+          pos[idx + 2] = COORDS.quasar[2] + Math.sin(angle) * radius;
+        }
+      }
+      quasarRef.current.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // 7. Pulsar core pulse scale & concentric field waves (Certifications)
+    if (pulsarMeshRef.current) {
+      const scale = 1.0 + Math.sin(time * 6.0) * 0.15; // Rapid star flashing pulse
+      pulsarMeshRef.current.scale.set(scale, scale, scale);
+    }
+    if (pulsarRef.current) {
+      const pos = pulsarRef.current.geometry.attributes.position.array;
+      for (let i = 0; i < pulsar.pos.length / 3; i++) {
+        const idx = i * 3;
+        const ringIdx = i % 4;
+        
+        // Compute radius from center
+        const dx = pos[idx] - COORDS.pulsar[0];
+        const dz = pos[idx + 2] - COORDS.pulsar[2];
+        let radius = Math.sqrt(dx*dx + dz*dz);
+        const baseRadius = 0.8 + ringIdx * 0.6;
+        
+        // Expanding wave pulsation
+        radius += 0.01;
+        if (radius > baseRadius + 0.6) {
+          radius = baseRadius; // Reset concentric wave limit
+        }
+
+        const angle = Math.atan2(dz, dx) + 0.005;
+        pos[idx] = COORDS.pulsar[0] + Math.cos(angle) * radius;
+        pos[idx + 2] = COORDS.pulsar[2] + Math.sin(angle) * radius;
+      }
+      pulsarRef.current.geometry.attributes.position.needsUpdate = true;
     }
   });
 
   return (
     <group ref={groupRef}>
-      <Points ref={pointsRef} positions={positions} colors={colors} stride={3}>
+      {/* GLOBAL BACKGROUND STARFIELD */}
+      <Points positions={starfield} stride={3}>
+        <PointMaterial
+          transparent
+          color="#ffffff"
+          size={0.035}
+          sizeAttenuation={true}
+          depthWrite={false}
+          map={glowTex}
+        />
+      </Points>
+
+      {/* ========================================================
+          1. BLACK HOLE (Hero)
+          Solid black core sphere + Swirling gold accretion disk
+          ======================================================== */}
+      <group position={COORDS.blackHole}>
+        <mesh>
+          <sphereGeometry args={[0.7, 32, 32]} />
+          <meshBasicMaterial color="#000000" />
+        </mesh>
+        <Points ref={blackHoleDiskRef} positions={blackHoleDisk.pos} colors={blackHoleDisk.cols} stride={3}>
+          <PointMaterial
+            transparent
+            vertexColors
+            size={0.09}
+            sizeAttenuation={true}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            map={glowTex}
+          />
+        </Points>
+      </group>
+
+      {/* ========================================================
+          2. ORBITING PLANETARY SYSTEM (Internships)
+          Central white sun + Orbiting concentric star paths
+          ======================================================== */}
+      <group position={COORDS.orbits}>
+        <mesh>
+          <sphereGeometry args={[0.3, 16, 16]} />
+          <meshBasicMaterial color="#00d4ff" />
+        </mesh>
+        <Points ref={orbitRingsRef} positions={orbitRings.pos} colors={orbitRings.cols} stride={3}>
+          <PointMaterial
+            transparent
+            vertexColors
+            size={0.07}
+            sizeAttenuation={true}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            map={glowTex}
+          />
+        </Points>
+      </group>
+
+      {/* ========================================================
+          3. VOLUMETRIC NEBULA CLOUDS (Projects)
+          Thick clusters of purple, magenta, and cyan gas clouds
+          ======================================================== */}
+      <Points ref={nebulaRef} positions={nebula.pos} colors={nebula.cols} stride={3}>
         <PointMaterial
           transparent
           vertexColors
-          size={0.065}
+          size={0.25} // Large sizes overlayed to look like volumetric gases
           sizeAttenuation={true}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
+          opacity={0.35}
+          map={glowTex}
         />
       </Points>
+
+      {/* ========================================================
+          4. THE QUASAR (Skills)
+          Swirling cyan disk + Double vertical shooting jets
+          ======================================================== */}
+      <group position={COORDS.quasar}>
+        <mesh>
+          <sphereGeometry args={[0.2, 16, 16]} />
+          <meshBasicMaterial color="#ffffff" />
+        </mesh>
+        <Points ref={quasarRef} positions={quasar.pos} colors={quasar.cols} stride={3}>
+          <PointMaterial
+            transparent
+            vertexColors
+            size={0.08}
+            sizeAttenuation={true}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            map={glowTex}
+          />
+        </Points>
+      </group>
+
+      {/* ========================================================
+          5. THE PULSAR (Certifications)
+          Pulsing amber core + Expanding magnetic field waves
+          ======================================================== */}
+      <group position={COORDS.pulsar}>
+        <mesh ref={pulsarMeshRef}>
+          <sphereGeometry args={[0.3, 16, 16]} />
+          <meshBasicMaterial color="#fbbf24" />
+        </mesh>
+        <Points ref={pulsarRef} positions={pulsar.pos} colors={pulsar.cols} stride={3}>
+          <PointMaterial
+            transparent
+            vertexColors
+            size={0.075}
+            sizeAttenuation={true}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            map={glowTex}
+          />
+        </Points>
+      </group>
     </group>
   );
 }
