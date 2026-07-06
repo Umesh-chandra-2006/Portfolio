@@ -78,7 +78,7 @@ function MatrixGrid({ mousePos, reducedMotion }) {
   );
 }
 
-export default function CodeMatrix({ mousePos, reducedMotion }) {
+function CodeMatrixScene({ mousePos, reducedMotion }) {
   const groupRef = useRef();
 
   useFrame((state) => {
@@ -94,6 +94,14 @@ export default function CodeMatrix({ mousePos, reducedMotion }) {
   });
 
   return (
+    <group ref={groupRef}>
+      <MatrixGrid mousePos={mousePos} reducedMotion={reducedMotion} />
+    </group>
+  );
+}
+
+export default function CodeMatrix({ mousePos, reducedMotion }) {
+  return (
     <div className="canvas-container">
       <Canvas
         camera={{ position: [0, 0.5, 4.5], fov: 60 }}
@@ -102,10 +110,7 @@ export default function CodeMatrix({ mousePos, reducedMotion }) {
       >
         <color attach="background" args={["#030014"]} />
         <ambientLight intensity={0.5} />
-        
-        <group ref={groupRef}>
-          <MatrixGrid mousePos={mousePos} reducedMotion={reducedMotion} />
-        </group>
+        <CodeMatrixScene mousePos={mousePos} reducedMotion={reducedMotion} />
       </Canvas>
     </div>
   );

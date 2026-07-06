@@ -134,7 +134,7 @@ function VolumetricClouds({ mousePos, reducedMotion }) {
   );
 }
 
-export default function GenerativeNebula({ mousePos, reducedMotion }) {
+function NebulaScene({ mousePos, reducedMotion }) {
   const groupRef = useRef();
 
   useFrame((state) => {
@@ -146,6 +146,14 @@ export default function GenerativeNebula({ mousePos, reducedMotion }) {
   });
 
   return (
+    <group ref={groupRef}>
+      <VolumetricClouds mousePos={mousePos} reducedMotion={reducedMotion} />
+    </group>
+  );
+}
+
+export default function GenerativeNebula({ mousePos, reducedMotion }) {
+  return (
     <div className="canvas-container">
       <Canvas
         camera={{ position: [0, 0, 4.5], fov: 60 }}
@@ -154,9 +162,7 @@ export default function GenerativeNebula({ mousePos, reducedMotion }) {
       >
         <color attach="background" args={["#030014"]} />
         <ambientLight intensity={0.5} />
-        <group ref={groupRef}>
-          <VolumetricClouds mousePos={mousePos} reducedMotion={reducedMotion} />
-        </group>
+        <NebulaScene mousePos={mousePos} reducedMotion={reducedMotion} />
       </Canvas>
     </div>
   );
