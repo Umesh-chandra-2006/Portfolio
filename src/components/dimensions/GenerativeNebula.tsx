@@ -1,13 +1,13 @@
-import React, { useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-function createGlowTexture() {
+function createGlowTexture(): THREE.CanvasTexture {
   const size = 128;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d')!;
   const half = size / 2;
   const grad = ctx.createRadialGradient(half, half, 0, half, half, half);
   grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
@@ -26,15 +26,10 @@ const NebulaShaderMaterial = {
     varying vec3 vColor;
     void main() {
       vColor = color;
-      
-      // Calculate dynamic drift on GPU using sine wave offsets
       vec3 waveOffset = sin(uTime * 0.35 + position) * aVelocity * 1.2;
       vec3 finalPos = position + waveOffset;
-      
       vec4 mvPosition = modelViewMatrix * vec4(finalPos, 1.0);
       gl_Position = projectionMatrix * mvPosition;
-      
-      // Dynamic size attenuation
       gl_PointSize = (48.0 / -mvPosition.z);
     }
   `,
@@ -49,14 +44,13 @@ const NebulaShaderMaterial = {
   `
 };
 
-function VolumetricClouds({ mousePos, reducedMotion }) {
-  const materialRef = useRef();
-  const pointsRef = useRef();
+function VolumetricClouds({ mousePos: _mousePos, reducedMotion }: { mousePos: { x: number; y: number }; reducedMotion: boolean }) {
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const pointsRef = useRef<THREE.Points>(null);
   const glowTex = useMemo(() => createGlowTexture(), []);
 
   const count = 18000;
 
-  // Set up local, non-shared uniforms map
   const uniforms = useMemo(() => ({
     uTime: { value: 0 },
     uTexture: { value: glowTex }
@@ -67,17 +61,15 @@ function VolumetricClouds({ mousePos, reducedMotion }) {
     const cols = new Float32Array(count * 3);
     const vels = new Float32Array(count * 3);
 
-    const magenta = new THREE.Color("#a855f7");
-    const purple = new THREE.Color("#7c3aed");
-    const cyan = new THREE.Color("#00d4ff");
+    const magenta = new THREE.Color('#a855f7');
+    const purple = new THREE.Color('#7c3aed');
+    const cyan = new THREE.Color('#00d4ff');
 
     for (let i = 0; i < count; i++) {
       const idx = i * 3;
-      
-      // Form a dense circular gas lane in front of the camera
       const theta = Math.random() * Math.PI * 2;
       const radius = 1.0 + Math.pow(Math.random(), 2) * 5.0;
-      
+
       pos[idx] = Math.cos(theta) * radius;
       pos[idx + 1] = Math.sin(theta) * radius * 0.8 + (Math.random() - 0.5) * 1.5;
       pos[idx + 2] = (Math.random() - 0.5) * 6;
@@ -99,7 +91,6 @@ function VolumetricClouds({ mousePos, reducedMotion }) {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = time;
     }
-
     if (pointsRef.current && !reducedMotion) {
       pointsRef.current.rotation.z = time * 0.02;
     }
@@ -108,18 +99,9 @@ function VolumetricClouds({ mousePos, reducedMotion }) {
   return (
     <points ref={pointsRef}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[nebulaData.pos, 3]}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          args={[nebulaData.cols, 3]}
-        />
-        <bufferAttribute
-          attach="attributes-aVelocity"
-          args={[nebulaData.vels, 3]}
-        />
+        <bufferAttribute attach="attributes-position" args={[nebulaData.pos, 3]} />
+        <bufferAttribute attach="attributes-color" args={[nebulaData.cols, 3]} />
+        <bufferAttribute attach="attributes-aVelocity" args={[nebulaData.vels, 3]} />
       </bufferGeometry>
       <shaderMaterial
         ref={materialRef}
@@ -134,10 +116,10 @@ function VolumetricClouds({ mousePos, reducedMotion }) {
   );
 }
 
-function NebulaScene({ mousePos, reducedMotion }) {
-  const groupRef = useRef();
+function NebulaScene({ mousePos, reducedMotion }: { mousePos: { x: number; y: number }; reducedMotion: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
 
-  useFrame((state) => {
+  useFrame((_state) => {
     if (reducedMotion) return;
     if (groupRef.current) {
       groupRef.current.position.x = mousePos.x * 0.5;
@@ -152,15 +134,15 @@ function NebulaScene({ mousePos, reducedMotion }) {
   );
 }
 
-export default function GenerativeNebula({ mousePos, reducedMotion }) {
+export default function GenerativeNebula({ mousePos, reducedMotion }: { mousePos: { x: number; y: number }; reducedMotion: boolean }) {
   return (
     <div className="canvas-container">
       <Canvas
         camera={{ position: [0, 0, 4.5], fov: 60 }}
         dpr={[1, 1.5]}
-        gl={{ antialias: false, alpha: false, powerPreference: "high-performance" }}
+        gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
       >
-        <color attach="background" args={["#030014"]} />
+        <color attach="background" args={['#030014']} />
         <ambientLight intensity={0.5} />
         <NebulaScene mousePos={mousePos} reducedMotion={reducedMotion} />
       </Canvas>

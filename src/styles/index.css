@@ -14,6 +14,9 @@
   --color-cyan: #00d4ff;
   --color-purple: #7c3aed;
   --color-magenta: #a855f7;
+  --color-gold: #fbbf24;
+  --color-gold-rgb: 251, 191, 36;
+  --color-green: #10b981;
 
   --color-text-primary: #f8fafc;
   --color-text-secondary: #cbd5e1;
@@ -76,7 +79,6 @@ body::before {
     radial-gradient(circle at 25% 70%, rgba(232, 197, 71, 0.04) 0%, transparent 55%),
     #030014;
 }
-
 
 /* ---------- UI Content Overlay ---------- */
 .scroll-container {
@@ -464,7 +466,7 @@ body::before {
   font-family: var(--font-mono);
   font-size: 11px;
   line-height: 1.6;
-  color: #10b981; /* neon green console log */
+  color: #10b981;
   opacity: 0.35;
   text-shadow: 0 0 4px rgba(16, 185, 129, 0.35);
   pointer-events: none;
@@ -491,7 +493,7 @@ body::before {
 }
 
 .terminal-prompt {
-  color: #00d4ff; /* cyan prompts */
+  color: #00d4ff;
 }
 
 .terminal-cursor {
@@ -505,4 +507,3 @@ body::before {
 @keyframes terminal-blink {
   to { visibility: hidden; }
 }
-

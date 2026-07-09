@@ -7,24 +7,22 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-function detectWebGL() {
+function detectWebGL(): boolean {
   try {
     const canvas = document.createElement('canvas');
     return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-  } catch (e) {
+  } catch {
     return false;
   }
 }
 
-export default function App() {
+export default function App(): React.JSX.Element {
   const [activeSection, setActiveSection] = useState(0);
   const [targetSection, setTargetSection] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [reducedMotion, setReducedMotion] = useState(false);
   const [webGLAvailable, setWebGLAvailable] = useState(true);
-  const containerRef = useRef(null);
-
-  // Ref to track current target section inside ScrollTrigger callback to prevent dependencies rebuild loop
+  const containerRef = useRef<HTMLDivElement>(null);
   const targetSectionRef = useRef(0);
 
   // 1. Detect WebGL support and prefers-reduced-motion
@@ -34,7 +32,7 @@ export default function App() {
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setReducedMotion(motionQuery.matches);
 
-    const handleMotionChange = (e) => setReducedMotion(e.matches);
+    const handleMotionChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
     motionQuery.addEventListener('change', handleMotionChange);
 
     return () => motionQuery.removeEventListener('change', handleMotionChange);
@@ -44,7 +42,7 @@ export default function App() {
   useEffect(() => {
     if (reducedMotion) return;
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       const x = (e.clientX / window.innerWidth) * 2 - 1;
       const y = -(e.clientY / window.innerHeight) * 2 + 1;
       setMousePos({ x, y });
@@ -67,7 +65,7 @@ export default function App() {
       onUpdate: (self) => {
         const progress = self.progress * (scrollCount - 1);
         const nextSec = Math.min(Math.floor(progress + 0.5), scrollCount - 1);
-        
+
         if (nextSec !== targetSectionRef.current) {
           targetSectionRef.current = nextSec;
           setTargetSection(nextSec);
@@ -78,10 +76,10 @@ export default function App() {
     return () => {
       scrollTrigger.kill();
     };
-  }, [reducedMotion]); // Re-create scroll trigger ONLY when motion settings change
+  }, [reducedMotion]);
 
   // Handle Dimension mounts once transition completes
-  const handleTransitionMidpoint = (nextSec) => {
+  const handleTransitionMidpoint = (nextSec: number) => {
     setActiveSection(nextSec);
   };
 

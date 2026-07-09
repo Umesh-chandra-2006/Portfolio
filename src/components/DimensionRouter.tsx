@@ -8,8 +8,13 @@ const VectorField = lazy(() => import('./dimensions/VectorField'));
 const PulsarMatrix = lazy(() => import('./dimensions/PulsarMatrix'));
 const VoidConsole = lazy(() => import('./dimensions/VoidConsole'));
 
-export default function DimensionRouter({ activeSection, mousePos, reducedMotion }) {
-  // Render only the active dimension component (unmount all others completely)
+interface DimensionRouterProps {
+  activeSection: number;
+  mousePos: { x: number; y: number };
+  reducedMotion: boolean;
+}
+
+export default function DimensionRouter({ activeSection, mousePos, reducedMotion }: DimensionRouterProps): React.JSX.Element {
   const renderDimension = () => {
     switch (activeSection) {
       case 0:
@@ -31,7 +36,6 @@ export default function DimensionRouter({ activeSection, mousePos, reducedMotion
 
   return (
     <Suspense fallback={
-      // Loading screen inside transition to ensure seamless swaps
       <div className="canvas-container" style={{ background: '#030014' }} />
     }>
       {renderDimension()}

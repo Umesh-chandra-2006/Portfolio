@@ -1,16 +1,22 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
-export default function PortalOverlay({ targetSection, reducedMotion, onTransitionMidpoint }) {
+interface PortalOverlayProps {
+  targetSection: number;
+  reducedMotion: boolean;
+  onTransitionMidpoint: (section: number) => void;
+}
+
+export default function PortalOverlay({ targetSection, reducedMotion, onTransitionMidpoint }: PortalOverlayProps): React.JSX.Element | null {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const currentTargetRef = useRef(targetSection);
-  const midTimerRef = useRef(null);
-  const endTimerRef = useRef(null);
+  const midTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const endTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Skip if targetSection hasn't actually changed
     if (targetSection === currentTargetRef.current) return;
-    
+
     currentTargetRef.current = targetSection;
 
     if (reducedMotion) {
@@ -45,8 +51,8 @@ export default function PortalOverlay({ targetSection, reducedMotion, onTransiti
 
   return (
     <div style={{ pointerEvents: 'none', position: 'fixed', inset: 0, zIndex: 100 }}>
-      {/* 
-        Keyed to targetSection to force React to mount a fresh element 
+      {/*
+        Keyed to targetSection to force React to mount a fresh element
         and restart the keyframe animations on every section swap
       */}
       <motion.div
@@ -54,12 +60,12 @@ export default function PortalOverlay({ targetSection, reducedMotion, onTransiti
         initial={{ clipPath: 'circle(0% at 50% 50%)' }}
         animate={{
           clipPath: [
-            'circle(0% at 50% 50%)', 
-            'circle(150% at 50% 50%)', 
+            'circle(0% at 50% 50%)',
+            'circle(150% at 50% 50%)',
             'circle(0% at 50% 50%)'
           ]
         }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
+        transition={{ duration: 0.6, ease: 'easeInOut' }}
         style={{
           position: 'absolute',
           inset: 0,
@@ -73,7 +79,7 @@ export default function PortalOverlay({ targetSection, reducedMotion, onTransiti
         key={`aberration-${targetSection}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: [0, 0.8, 0] }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
+        transition={{ duration: 0.6, ease: 'easeInOut' }}
         style={{
           position: 'absolute',
           inset: 0,

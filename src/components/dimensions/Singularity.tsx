@@ -1,20 +1,18 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { MeshTransmissionMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
-function GlassTorusKnot({ mousePos, reducedMotion }) {
-  const meshRef = useRef();
+function GlassTorusKnot({ mousePos, reducedMotion }: { mousePos: { x: number; y: number }; reducedMotion: boolean }) {
+  const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     const time = reducedMotion ? 0 : state.clock.getElapsedTime();
 
     if (meshRef.current) {
-      // Rotation animation loop
       meshRef.current.rotation.x = time * 0.25;
       meshRef.current.rotation.y = time * 0.15;
 
-      // Mouse Parallax reaction
       if (!reducedMotion) {
         meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, mousePos.x * 0.8, 0.08);
         meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, mousePos.y * 0.8, 0.08);
@@ -25,7 +23,6 @@ function GlassTorusKnot({ mousePos, reducedMotion }) {
   return (
     <mesh ref={meshRef}>
       <torusKnotGeometry args={[1.3, 0.45, 120, 16]} />
-      {/* MeshTransmissionMaterial for photorealistic glass refraction/blur */}
       <MeshTransmissionMaterial
         backside
         backsideThickness={0.2}
@@ -47,26 +44,19 @@ function GlassTorusKnot({ mousePos, reducedMotion }) {
   );
 }
 
-export default function Singularity({ mousePos, reducedMotion }) {
+export default function Singularity({ mousePos, reducedMotion }: { mousePos: { x: number; y: number }; reducedMotion: boolean }) {
   return (
     <div className="canvas-container">
       <Canvas
         camera={{ position: [0, 0, 4.2], fov: 60 }}
         dpr={[1, 1.5]}
-        gl={{
-          antialias: true,
-          alpha: false,
-          powerPreference: "high-performance"
-        }}
+        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       >
-        <color attach="background" args={["#030014"]} />
+        <color attach="background" args={['#030014']} />
         <ambientLight intensity={0.2} />
-        
-        {/* Cinematic spotlights to catch glass facets and highlights */}
         <pointLight position={[5, 5, 5]} intensity={2.5} color="#00d4ff" />
         <pointLight position={[-5, -5, -5]} intensity={1.5} color="#7c3aed" />
         <directionalLight position={[0, 5, 0]} intensity={1} color="#ffffff" />
-
         <GlassTorusKnot mousePos={mousePos} reducedMotion={reducedMotion} />
       </Canvas>
     </div>

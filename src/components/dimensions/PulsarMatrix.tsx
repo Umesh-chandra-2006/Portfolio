@@ -1,13 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
-export default function PulsarMatrix({ mousePos, reducedMotion }) {
-  const canvasRef = useRef(null);
+export default function PulsarMatrix({ mousePos: _mousePos, reducedMotion }: { mousePos: { x: number; y: number }; reducedMotion: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    let animationFrameId;
+    if (!ctx) return;
+    let animationFrameId: number;
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -30,18 +31,15 @@ export default function PulsarMatrix({ mousePos, reducedMotion }) {
       const cx = canvas.width / 2;
       const cy = canvas.height / 2;
 
-      // Subtle radar grid background coordinates
       ctx.strokeStyle = 'rgba(251, 191, 36, 0.04)';
       ctx.lineWidth = 1;
 
-      // Draw concentric radar lines
       for (let r = 50; r <= 300; r += 50) {
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      // Draw crosshairs
       ctx.beginPath();
       ctx.moveTo(cx - 320, cy);
       ctx.lineTo(cx + 320, cy);
@@ -49,13 +47,11 @@ export default function PulsarMatrix({ mousePos, reducedMotion }) {
       ctx.lineTo(cx, cy + 320);
       ctx.stroke();
 
-      // Draw pulsing gold magnetic waves
-      ctx.strokeStyle = 'rgba(251, 191, 36, 0.25)';
       if (!reducedMotion) {
         rings.forEach((ring) => {
           ring.r += ring.speed;
           if (ring.r > ring.maxR) {
-            ring.r = 30; // reset
+            ring.r = 30;
           }
           const alpha = 1.0 - (ring.r / ring.maxR);
           ctx.strokeStyle = `rgba(251, 191, 36, ${alpha * 0.25})`;
@@ -64,21 +60,18 @@ export default function PulsarMatrix({ mousePos, reducedMotion }) {
           ctx.stroke();
         });
       } else {
-        // Static rings for reduced motion
         ctx.beginPath();
         ctx.arc(cx, cy, 100, 0, Math.PI * 2);
         ctx.arc(cx, cy, 180, 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      // Draw sweeping radar arm (lightweight line)
       if (!reducedMotion) {
         angle += 0.015;
       }
       const sweepX = cx + Math.cos(angle) * 300;
       const sweepY = cy + Math.sin(angle) * 300;
 
-      // Sweep gradient fade-out line
       ctx.strokeStyle = 'rgba(251, 191, 36, 0.3)';
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -86,10 +79,9 @@ export default function PulsarMatrix({ mousePos, reducedMotion }) {
       ctx.lineTo(sweepX, sweepY);
       ctx.stroke();
 
-      // Draw subtle terminal angle indicators
       ctx.fillStyle = 'rgba(251, 191, 36, 0.4)';
       ctx.font = '9px monospace';
-      ctx.fillText(`AZIMUTH: ${(angle * (180 / Math.PI) % 360).toFixed(1)}°`, cx - 300, cy - 310);
+      ctx.fillText(`AZIMUTH: ${(angle * (180 / Math.PI) % 360).toFixed(1)}\u00B0`, cx - 300, cy - 310);
       ctx.fillText('PULSAR MATRIX RADAR // VERIFIED SIGNAL', cx - 300, cy - 295);
 
       animationFrameId = requestAnimationFrame(draw);
