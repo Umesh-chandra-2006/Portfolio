@@ -296,6 +296,7 @@ main { position: relative; z-index: 2; }
 /* RECEIPTS */
 .r-block { max-width: 1100px; margin-bottom: 96px; }
 .r-block:last-child { margin-bottom: 0; }
+#research { scroll-margin-top: 110px; }
 .r-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 18px; }
 .row { display: grid; grid-template-columns: 220px 1fr auto; gap: 40px; padding: 28px 0; border-top: 1px solid var(--rule); align-items: start; }
 .row:last-child { border-bottom: 1px solid var(--rule); }
@@ -503,8 +504,8 @@ footer { padding: 48px var(--pad); border-top: 1px solid var(--rule); display: f
       <div class="beat reveal">
         <div class="beat-label">What held</div>
         <div>
-          <h3>150+ students, 500+ submissions.</h3>
-          <p>The submissions came in during its first month. It ran on AWS EC2 with images in ECR, and three features cleared code review and shipped inside their sprints. The project is archived now, and the code is public.</p>
+          <h3>50+ active users, 500+ submissions.</h3>
+          <p>The submissions came in during its first month. Judging and the web app ran as two services, on AWS EC2 with images in ECR and on Render, and verdicts came back in under 200 ms end to end. Three features cleared code review and shipped inside their sprints. The project is archived now, and the code is public.</p>
           <div class="tags"><span>React</span><span>Node.js</span><span>Docker</span><span>MongoDB</span><span>AWS EC2/ECR</span><span>Gemini API</span></div>
           <div class="links"><a href="https://github.com/Umesh-chandra-2006/Code_Slayer" target="_blank" rel="noopener">Code Slayer on GitHub <span class="arr">↗</span></a></div>
         </div>
@@ -532,7 +533,7 @@ footer { padding: 48px var(--pad); border-top: 1px solid var(--rule); display: f
   </div>
 
   <div class="ledger reveal">
-    <div class="stat"><b>150+</b><span>users served</span></div>
+    <div class="stat"><b>50+</b><span>active users</span></div>
     <div class="stat"><b>500+</b><span>submissions, month one</span></div>
     <div class="stat"><b>10 wks</b><span>zero to production</span></div>
   </div>
@@ -613,9 +614,9 @@ footer { padding: 48px var(--pad); border-top: 1px solid var(--rule); display: f
         <div class="beat-label">Hackathon<small>Team build</small></div>
         <div>
           <h3>MarketPulse-X</h3>
-          <p>A supply chain risk platform, built at Google's Agentathon: a Guinness World Record event with 15,000+ participants. I owned the <strong>LangGraph architecture and state</strong> for six agents, the SEC EDGAR integration and the GKE deployment.</p>
-          <p>When the pipeline's confidence comes back low, an autonomous loop re-triggers the agents instead of shipping the answer.</p>
-          <div class="tags"><span>LangGraph</span><span>FastAPI</span><span>Kubernetes</span><span>SEC EDGAR</span></div>
+          <p>A supply chain risk platform, built at Google's Agentathon: a Guinness World Record event with 15,000+ participants. It was a team build. I owned the <strong>LangGraph orchestration and state management</strong> for the six agents; teammates built the SEC EDGAR integration and the GKE deployment.</p>
+          <p>When an analysis scores below <strong>70% confidence</strong>, a loop re-runs the upstream agents instead of shipping the answer. The pipeline fuses supplier data parsed from SEC 10-K filings with live news, so risk is re-assessed as events arrive.</p>
+          <div class="tags"><span>LangGraph</span><span>FastAPI</span><span>Python</span><span>Docker</span></div>
           <div class="links">
             <a href="https://market-pulse-jet.vercel.app" target="_blank" rel="noopener">Live <span class="arr">↗</span></a>
             <a href="https://github.com/Jaswanth-K1210/MarketPulse" target="_blank" rel="noopener">GitHub <span class="arr">↗</span></a>
@@ -692,6 +693,7 @@ footer { padding: 48px var(--pad); border-top: 1px solid var(--rule); display: f
           <h3>PlaceIQ</h3>
           <p>Placement management for the officers who run it at Tier-2 and Tier-3 colleges. It started as a job-alert app for students; I reframed it as infrastructure for coordinators, because that is where the work piles up.</p>
           <p>Many colleges share one system, so access is a <strong>four-tier hierarchy</strong> across 65 REST endpoints, with optimistic concurrency control so two coordinators cannot overwrite each other. Students get a resume builder with a live ATS score and a LaTeX mode; coordinators get Kanban tracking.</p>
+          <p>Resume scoring keeps model cost bounded: rule-based matching scores every submission, and the LLM review runs only on demand. 22 Jest and Supertest tests run in CI.</p>
           <div class="tags"><span>React</span><span>Node.js</span><span>FastAPI</span><span>MongoDB</span><span>OpenRouter API</span><span>Docker</span><span>CI</span></div>
           <div class="links">
             <a href="https://place-iq-six.vercel.app" target="_blank" rel="noopener">Live <span class="arr">↗</span></a>
@@ -762,17 +764,17 @@ footer { padding: 48px var(--pad); border-top: 1px solid var(--rule); display: f
         <div>
           <h3>DevMem-Agents</h3>
           <p>My B.Tech minor project: an upgrade to the memory of Stanford's Generative Agents, the simulated town of Smallville. The flat memory stream is replaced by a <strong>four-stage developmental memory</strong>: personality priors, episodic memory, sleep-triggered consolidation, and identity. Everything else stays as upstream, so memory is the only variable.</p>
-          <p>I run it as project owner, with AI coding agents doing the implementation, under one hard constraint: zero API cost, using only free-tier keys rotated by a custom router. The baseline-versus-staged comparison is set up, and there are no results to report yet.</p>
-          <div class="tags"><span>Generative Agents</span><span>LLM routing</span><span>Embeddings</span><span>SQLite</span></div>
+          <p>I run it as project owner, with AI coding agents doing the implementation, under one hard constraint: zero API cost, using only free-tier keys rotated by a custom router. The baseline-versus-staged comparison is set up, and there are no results to report yet. The design is written up as an IEEE-format paper with two co-authors, presented in October 2026.</p>
+          <div class="tags"><span>Python</span><span>Generative Agents</span><span>Gemini and Groq APIs</span><span>Embeddings</span><span>SQLite</span></div>
           <div class="links"><a href="https://github.com/Umesh-chandra-2006/DevMems" target="_blank" rel="noopener">GitHub <span class="arr">↗</span></a></div>
         </div>
       </div>
       <div class="beat reveal">
-        <div class="beat-label">Research<small>In progress, unpublished</small></div>
+        <div class="beat-label">Research<small>Drafts, none published</small></div>
         <div>
           <h3>How memory should work</h3>
-          <p>With a co-author I'm working on a set of papers about memory in learning systems: a variance-concentration criterion for associative memory (tested with DINOv2 on CLEVR), models seeded with innate priors so new learning attaches to existing structure, and training on history in chronological order. Underneath them sits a larger idea, the Persistent Artificial World: design the environment first, and let each agent grow its own mind inside it instead of prompting a persona into a shared model.</p>
-          <p>The most useful result so far is a negative one: <strong>information you can recover, but that occupies no geometric space, is functionally useless to memory.</strong></p>
+          <p>Underneath the projects sits a set of papers on memory in learning systems. The furthest along, S-DAM, asks whether seeding an associative memory with core-knowledge priors helps it retrieve. Its most useful result is a negative one: <strong>a feature can be decodable and still be useless to memory.</strong></p>
+          <div class="links"><a href="#research">The papers, with their real status <span class="arr">↓</span></a></div>
         </div>
       </div>
     </div>
@@ -818,18 +820,28 @@ footer { padding: 48px var(--pad); border-top: 1px solid var(--rule); display: f
   <div class="r-block">
     <div class="r-label reveal">Roles</div>
     <div class="row reveal"><div class="row-org">IISPPR<br>May to Aug 2026</div><div><div class="row-title">AI Engineer Intern</div><div class="row-detail">Led a team of nine. LLM-orchestrated automation pipelines in n8n, including a three-agent rewrite, verify and refine pipeline.</div></div><div class="row-badge">Remote</div></div>
-    <div class="row reveal"><div class="row-org">Freelance<br>Client work</div><div><div class="row-title">Full-stack builds for a client</div><div class="row-detail">A verified property marketplace on Next.js and Supabase: access-control and row-level-security audits, build specs, and a React CRM prototype with role-based views and dashboards.</div></div><div class="row-badge">Client work</div></div>
+    <div class="row reveal"><div class="row-org">Freelance<br>Client work</div><div><div class="row-title">Full-stack builds for a client</div><div class="row-detail">A verified property marketplace on Next.js and Supabase, with pre-launch security audits that closed privilege-escalation paths and row-level-security regressions. Also a separate React CRM with role-based views and Recharts dashboards, and the build specs for both.</div></div><div class="row-badge">Client work</div></div>
     <div class="row reveal"><div class="row-org">Slayyers<br>Jul to Dec 2025</div><div><div class="row-title">Software Engineer Intern</div><div class="row-detail">Backend microservices, Redis caching and CI/CD for a 60-minute fashion delivery platform.</div></div><div class="row-badge">Remote</div></div>
-    <div class="row reveal"><div class="row-org">AlgoUniversity<br>May to Jul 2025</div><div><div class="row-title">Software Engineer Co-op Intern</div><div class="row-detail">Top 1.4% of 40,000+ applicants. Solo-built and shipped an online judge in 10 weeks.</div></div><div class="row-badge">Remote</div></div>
+    <div class="row reveal"><div class="row-org">AlgoUniversity<br>May to Jul 2025</div><div><div class="row-title">Software Engineer Co-op Intern</div><div class="row-detail">Top 1.4% of 40,000+ applicants. Solo-built and shipped Code Slayer, an online judge, in 10 weeks: 50+ active users and 500+ submissions in month one.</div></div><div class="row-badge">Remote</div></div>
   </div>
 
   <div class="r-block">
     <div class="r-label reveal">Credentials</div>
-    <div class="row reveal"><div class="row-org">AlgoUniversity · YC-backed</div><div><div class="row-title">Accelerator, top 1.4% of 40,000</div><div class="row-detail">Production-focused DSA and systems curriculum. Mentorship from engineers at Google, Apple, Grab and Alphagrep.</div></div><div class="row-badge">Top cohort</div></div>
-    <div class="row reveal"><div class="row-org">Google</div><div><div class="row-title">Agentathon participant</div><div class="row-detail">Guinness World Record for the largest AI hackathon, with 15,000+ participants. Built MarketPulse-X there.</div></div><div class="row-badge">GWR event</div></div>
+    <div class="row reveal"><div class="row-org">AlgoUniversity · YC-backed<br>Mar to Aug 2025</div><div><div class="row-title">Accelerator, top 1.4% of 40,000</div><div class="row-detail">Production-focused DSA and systems curriculum, with Graphs and Dynamic Programming camps. Mentorship from engineers at Google, Apple, Grab and Alphagrep.</div></div><div class="row-badge">Top cohort</div></div>
+    <div class="row reveal"><div class="row-org">Google</div><div><div class="row-title">Agentathon participant</div><div class="row-detail">Guinness World Record for the largest AI hackathon, with 15,000+ participants. Built MarketPulse-X there with a team.</div></div><div class="row-badge">GWR event</div></div>
+    <div class="row reveal"><div class="row-org">Inter-college</div><div><div class="row-title">3+ hackathons</div><div class="row-detail">Each ended with a working prototype, shipped in under 24 hours.</div></div><div class="row-badge">Shipped</div></div>
     <div class="row reveal"><div class="row-org">Google Cloud</div><div><div class="row-title">25 skill badges</div><div class="row-detail">Gemini Application Development, Multimodal RAG, MLOps for Generative AI, and Responsible AI.</div></div><div class="row-badge"><a href="https://www.cloudskillsboost.google/public_profiles/b287a3b0-e823-4df3-b97c-e66d13b137e4" target="_blank" rel="noopener">Profile ↗</a></div></div>
     <div class="row reveal"><div class="row-org">Suntek · Institution-wide</div><div><div class="row-title">MERN stack training</div><div class="row-detail">Selected among 150 students across all branches for an industry-led full-stack program.</div></div><div class="row-badge">Completed</div></div>
     <div class="row reveal"><div class="row-org">Anurag University</div><div><div class="row-title">B.Tech, Computer Science</div><div class="row-detail">Final year, graduating May 2027. 8.44 CGPA. 250+ problems solved on LeetCode, plus HackerRank badges.</div></div><div class="row-badge"><a href="https://leetcode.com/u/glRAN9pR9u/" target="_blank" rel="noopener">LeetCode ↗</a> &nbsp; <a href="https://www.hackerrank.com/profile/23eg105k601" target="_blank" rel="noopener">HackerRank ↗</a></div></div>
+  </div>
+
+  <div class="r-block" id="research">
+    <div class="r-label reveal">Research · none of it published yet</div>
+    <div class="row reveal"><div class="row-org">S-DAM<br>With Jaswanth Koppisetty</div><div><div class="row-title">Decodable Is Not Usable: A Variance-Concentration Criterion for Core-Knowledge Priors in Associative Memory</div><div class="row-detail">We seed a Modern Hopfield memory with core-knowledge priors and test whether retrieval improves, on 6,000 CLEVR scenes encoded by a frozen DINOv2 ViT-S/14, with every threshold pre-registered before the runs. Object count is linearly decodable (R&sup2; = 0.95) yet carries only 1.03x the variance of a random direction, so decodability alone cannot qualify a memory prior. A factored-storage variant moved the retrieval crossover from 56% to 82% corruption: a partial fix, and reported as one.</div></div><div class="row-badge">Workshop-length draft &nbsp; <a href="https://github.com/Jaswanth-K1210/SDAM" target="_blank" rel="noopener">Code ↗</a></div></div>
+    <div class="row reveal"><div class="row-org">DevMem-Agents<br>B.Tech minor project</div><div><div class="row-title">Four-stage developmental memory for generative agents</div><div class="row-detail">An IEEE-format paper on the design, written with two co-authors at Anurag University and presented in October 2026. It compares recorded baseline and staged Smallville runs; there are no measured results to report yet.</div></div><div class="row-badge">Presented &nbsp; <a href="https://github.com/Umesh-chandra-2006/DevMems" target="_blank" rel="noopener">Code ↗</a></div></div>
+    <div class="row reveal"><div class="row-org">DAM</div><div><div class="row-title">Developmental Attractor Memory</div><div class="row-detail">Seed a model with innate priors (objects, agents, number, space) so new learning attaches to existing structure instead of overwriting it. Its honest negative: some information is recoverable from features, occupies no geometric space, and is useless to memory. A related paper, CTAM, is in progress alongside it.</div></div><div class="row-badge">In progress</div></div>
+    <div class="row reveal"><div class="row-org">EPOCH</div><div><div class="row-title">Training on history in order</div><div class="row-detail">Train on human history chronologically through domain sub-models joined by a consolidator. A "Primordial Agent" buds a new sub-model only when history produces a new domain.</div></div><div class="row-badge">Exploring</div></div>
+    <div class="row reveal"><div class="row-org">The larger idea</div><div><div class="row-title">Persistent Artificial World</div><div class="row-detail">Design the environment first, and let each agent grow its own mind inside it instead of prompting a persona into a shared model.</div></div><div class="row-badge">Exploring</div></div>
   </div>
 
   <div class="r-block">
@@ -842,12 +854,14 @@ footer { padding: 48px var(--pad); border-top: 1px solid var(--rule); display: f
 
   <div class="r-block">
     <div class="r-label reveal">What I reach for</div>
-    <div class="skills-row reveal"><div class="skills-row-label">Languages</div><div class="skills-pills"><span class="skill-pill primary">C++</span><span class="skill-pill primary">Python</span><span class="skill-pill primary">JavaScript</span><span class="skill-pill">Java</span><span class="skill-pill">C</span></div></div>
-    <div class="skills-row reveal"><div class="skills-row-label">Frontend</div><div class="skills-pills"><span class="skill-pill primary">React</span><span class="skill-pill">Tailwind CSS</span><span class="skill-pill">React Native</span><span class="skill-pill">Zustand</span><span class="skill-pill">HTML / CSS</span><span class="skill-pill">Three.js</span></div></div>
-    <div class="skills-row reveal"><div class="skills-row-label">Backend</div><div class="skills-pills"><span class="skill-pill primary">Node.js</span><span class="skill-pill primary">Express.js</span><span class="skill-pill">FastAPI</span><span class="skill-pill">REST APIs</span><span class="skill-pill">WebSockets</span></div></div>
-    <div class="skills-row reveal"><div class="skills-row-label">Databases</div><div class="skills-pills"><span class="skill-pill primary">MongoDB</span><span class="skill-pill">Redis</span><span class="skill-pill">PostgreSQL</span><span class="skill-pill">MySQL</span></div></div>
-    <div class="skills-row reveal"><div class="skills-row-label">Cloud &amp; DevOps</div><div class="skills-pills"><span class="skill-pill primary">Docker</span><span class="skill-pill primary">AWS (EC2, ECR, S3)</span><span class="skill-pill">Kubernetes (GKE)</span><span class="skill-pill">Vercel</span><span class="skill-pill">Render</span><span class="skill-pill">Cloudinary</span></div></div>
-    <div class="skills-row reveal"><div class="skills-row-label">AI / Agents</div><div class="skills-pills"><span class="skill-pill primary">LangGraph</span><span class="skill-pill primary">n8n</span><span class="skill-pill">Multi-agent Pipelines</span><span class="skill-pill">Gemini API</span><span class="skill-pill">Claude API</span><span class="skill-pill">OpenRouter API</span></div></div>
+    <div class="skills-row reveal"><div class="skills-row-label">Languages</div><div class="skills-pills"><span class="skill-pill primary">C++</span><span class="skill-pill primary">Python</span><span class="skill-pill primary">JavaScript</span><span class="skill-pill">TypeScript</span><span class="skill-pill">Java</span><span class="skill-pill">C</span></div></div>
+    <div class="skills-row reveal"><div class="skills-row-label">Frontend</div><div class="skills-pills"><span class="skill-pill primary">React</span><span class="skill-pill">Next.js</span><span class="skill-pill">Tailwind CSS</span><span class="skill-pill">React Native</span><span class="skill-pill">Zustand</span><span class="skill-pill">HTML / CSS</span><span class="skill-pill">Three.js</span></div></div>
+    <div class="skills-row reveal"><div class="skills-row-label">Backend</div><div class="skills-pills"><span class="skill-pill primary">Node.js</span><span class="skill-pill primary">Express.js</span><span class="skill-pill">FastAPI</span><span class="skill-pill">REST APIs</span><span class="skill-pill">WebSockets</span><span class="skill-pill">JWT Auth</span><span class="skill-pill">Rate Limiting</span></div></div>
+    <div class="skills-row reveal"><div class="skills-row-label">Databases</div><div class="skills-pills"><span class="skill-pill primary">MongoDB</span><span class="skill-pill">Redis</span><span class="skill-pill">PostgreSQL</span><span class="skill-pill">MySQL</span><span class="skill-pill">Supabase</span></div></div>
+    <div class="skills-row reveal"><div class="skills-row-label">Cloud &amp; DevOps</div><div class="skills-pills"><span class="skill-pill primary">Docker</span><span class="skill-pill primary">AWS (EC2, ECR, S3)</span><span class="skill-pill">Kubernetes</span><span class="skill-pill">Vercel</span><span class="skill-pill">Render</span><span class="skill-pill">Cloudinary</span><span class="skill-pill">CI/CD</span></div></div>
+    <div class="skills-row reveal"><div class="skills-row-label">AI / Agents</div><div class="skills-pills"><span class="skill-pill primary">LangGraph</span><span class="skill-pill primary">n8n</span><span class="skill-pill">Multi-agent Pipelines</span><span class="skill-pill">Gemini API</span><span class="skill-pill">Groq API</span><span class="skill-pill">Claude API</span><span class="skill-pill">OpenRouter API</span></div></div>
+    <div class="skills-row reveal"><div class="skills-row-label">Data &amp; ML</div><div class="skills-pills"><span class="skill-pill">PyTorch</span><span class="skill-pill">scikit-learn</span><span class="skill-pill">NumPy</span><span class="skill-pill">SciPy</span><span class="skill-pill">Matplotlib</span></div></div>
+    <div class="skills-row reveal"><div class="skills-row-label">Testing</div><div class="skills-pills"><span class="skill-pill">Jest</span><span class="skill-pill">Supertest</span><span class="skill-pill">pytest</span></div></div>
     <div class="skills-row reveal"><div class="skills-row-label">Integrations</div><div class="skills-pills"><span class="skill-pill">FFmpeg</span><span class="skill-pill">HLS Streaming</span><span class="skill-pill">Razorpay</span><span class="skill-pill">Brevo</span><span class="skill-pill">Twilio</span></div></div>
   </div>
 </section>
@@ -1182,20 +1196,21 @@ footer { padding: 48px var(--pad); border-top: 1px solid var(--rule); display: f
     const LINKS = {
       placeiq: 'https://place-iq-six.vercel.app', marketpulse: 'https://market-pulse-jet.vercel.app',
       omnilearn: 'https://github.com/Umesh-chandra-2006/MERN_TEAM-32', blog: 'https://blog-woad-eight-95.vercel.app',
-      resume: './Umesh_Chandra_Resume.pdf', arcanis: 'https://github.com/Umesh-chandra-2006/Arcanis', devmems: 'https://github.com/Umesh-chandra-2006/DevMems', kairos: 'https://github.com/Umesh-chandra-2006/Kairos',
+      resume: './Umesh_Chandra_Resume.pdf', arcanis: 'https://github.com/Umesh-chandra-2006/Arcanis', devmems: 'https://github.com/Umesh-chandra-2006/DevMems', sdam: 'https://github.com/Jaswanth-K1210/SDAM', kairos: 'https://github.com/Umesh-chandra-2006/Kairos',
       github: 'https://github.com/Umesh-chandra-2006', linkedin: 'https://www.linkedin.com/in/tirumani-umesh-chandra-b3b5b8314/'
     };
     const PROJECTS = {
       'code-slayer': 'Online judge. Sandboxed C++ and Python, 1,000 ms and 256 MB limits, AI verdict feedback. Built solo in 10 weeks.',
       placeiq: 'Placement management for Tier-2 and Tier-3 colleges. 4-tier RBAC, 65 REST endpoints, ATS resume scoring. MVP deployed.',
       kairos: 'Daily interview-prep app for Indian engineering students. Question feed, AI scoring, streaks. In a retention test.',
-      'marketpulse-x': 'Six-agent LangGraph pipeline for supply chain risk, with a confidence loop. Built at Google Agentathon.',
+      'marketpulse-x': 'Six-agent LangGraph pipeline for supply chain risk. Team build at Google Agentathon; I owned the orchestration and the confidence loop.',
       cloudsense: 'AWS cost agent that learns from rejected recommendations, on Hindsight agent memory.',
       arcanis: 'Competitive magic RPG. Describe a spell in words, an LLM balances it and paints the card.',
       'devmem-agents': 'Four-stage developmental memory for Generative Agents. B.Tech minor project. No results yet.',
+      's-dam': 'Co-authored paper draft: a variance-concentration criterion for associative memory. DINOv2 on CLEVR. Unpublished.',
       omnilearn: 'LMS with HLS streaming, an FFmpeg transcoding queue, S3 uploads and Razorpay payments. Team build.'
     };
-    const GOTO = { 1: 'ch1', 2: 'ch2', 3: 'ch3', 4: 'ch4', 5: 'ch5', 6: 'receipts', 7: 'contact', judge: 'ch1', agents: 'ch3', receipts: 'receipts', contact: 'contact', home: 'hero' };
+    const GOTO = { research: 'research', 1: 'ch1', 2: 'ch2', 3: 'ch3', 4: 'ch4', 5: 'ch5', 6: 'receipts', 7: 'contact', judge: 'ch1', agents: 'ch3', receipts: 'receipts', contact: 'contact', home: 'hero' };
     const history = [];
     let cursor = 0, lastFocus = null;
     function print(text, cls) { const d = document.createElement('div'); if (cls) d.className = cls; d.textContent = text; out.appendChild(d); return d; }
@@ -1204,7 +1219,7 @@ footer { padding: 48px var(--pad); border-top: 1px solid var(--rule); display: f
       help() {
         print('whoami        who lives here', 'dim'); print('neofetch      the machine behind the work', 'dim');
         print('ls            list projects', 'dim'); print('cat <name>    read about one project', 'dim');
-        print('goto <1-7>    jump to a chapter', 'dim'); print('open <name>   placeiq, marketpulse, arcanis, devmems, kairos, resume, github', 'dim');
+        print('goto <1-7>    jump to a chapter', 'dim'); print('open <name>   placeiq, marketpulse, arcanis, devmems, sdam, kairos, resume, github', 'dim');
         print('sigils        what you have earned so far', 'dim'); print('stack         what I reach for', 'dim'); print('contact       how to reach me', 'dim'); print('clear, exit', 'dim');
       },
       whoami() {
@@ -1225,7 +1240,7 @@ footer { padding: 48px var(--pad); border-top: 1px solid var(--rule); display: f
         close(); document.getElementById(id).scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
       },
       open(arg) { LINKS[arg] ? (print('opening ' + arg, 'green'), window.open(LINKS[arg], '_blank', 'noopener')) : print('open: unknown target. Try: ' + Object.keys(LINKS).join(', '), 'red'); },
-      stack() { print('C++  Python  JavaScript  Node.js  Express  FastAPI  React', 'peach'); print('MongoDB  PostgreSQL  MySQL  Redis  Docker  Kubernetes  AWS', 'peach'); print('LangGraph  n8n  Gemini, Claude and OpenRouter APIs', 'peach'); },
+      stack() { print('C++  Python  JavaScript  Node.js  Express  FastAPI  React', 'peach'); print('MongoDB  PostgreSQL  MySQL  Redis  Docker  Kubernetes  AWS', 'peach'); print('LangGraph  n8n  Gemini, Groq, Claude and OpenRouter APIs', 'peach'); print('PyTorch  scikit-learn  NumPy  pytest  Jest', 'peach'); },
       contact() { link('thirumaniumeshchandra2006@gmail.com', 'mailto:thirumaniumeshchandra2006@gmail.com'); link('linkedin', LINKS.linkedin); link('github', LINKS.github); },
       clear() { out.textContent = ''; },
       exit() { close(); },
