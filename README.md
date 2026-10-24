@@ -2,7 +2,7 @@
 
 Personal site of Umesh Chandra Tirumani: a story in five chapters that you fly through.
 
-Live: https://umesh-chandra-2006.github.io/Portfolio/
+Live: https://umesh.subspace.codes/
 
 ## How it is built
 
